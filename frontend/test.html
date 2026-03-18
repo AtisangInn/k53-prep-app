@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>K53 Practice Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+  tailwind.config = {
+    theme: { extend: { colors: { primary: '#144bb8' }, fontFamily: { sans: ['Lexend','sans-serif'] }, borderRadius: { custom: '8px' } } }
+  }
+</script>
+<style>
+  body { background:#f9fafb; font-family:'Lexend',sans-serif; }
+  .status-answered { background:#144bb8; color:white; }
+  .status-skipped  { background:#f59e0b; color:white; }
+  .status-current  { border:2px solid #144bb8; font-weight:bold; background:#eff4ff; }
+  .status-unseen   { background:#e5e7eb; color:#6b7280; }
+  .answer-opt { transition:border .15s,background .15s; }
+  .answer-opt.selected { border-color:#144bb8 !important; background:#eff4ff; }
+</style>
+</head>
+<body class="min-h-screen text-slate-900">
+
+<!-- Header -->
+<header class="bg-white border-b border-gray-200 sticky top-0 z-10">
+  <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-10 h-10 bg-primary flex items-center justify-center rounded-custom text-white font-bold text-xl">K</div>
+      <h1 class="text-xl font-bold tracking-tight">K53 Practice Test</h1>
+    </div>
+    <div id="test-timer" class="flex items-center gap-3 bg-red-50 px-4 py-2 rounded-custom border border-red-100">
+      <svg class="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <span id="timer-display" class="font-mono text-lg font-bold text-red-600">58:00</span>
+    </div>
+  </div>
+</header>
+
+<!-- Loading state -->
+<div id="loading-state" class="flex flex-col items-center justify-center min-h-96 text-gray-500 gap-4">
+  <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+  <p>Preparing your test...</p>
+</div>
+
+<!-- Test content (hidden until loaded) -->
+<div id="test-content" class="hidden">
+<main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+  <!-- Question area -->
+  <section class="lg:col-span-2 space-y-6">
+    <div class="bg-white p-6 md:p-8 rounded-custom shadow-sm border border-gray-100">
+      <div class="flex items-center justify-between mb-6">
+        <span id="q-counter" class="text-sm font-semibold text-primary uppercase tracking-wider">Question 1 of 64</span>
+        <span id="q-category" class="text-xs text-gray-400">Rules of the Road</span>
+      </div>
+      <div id="q-image-wrap" class="hidden mb-6 flex justify-center bg-gray-50 p-4 rounded-custom border border-dashed border-gray-200">
+        <img id="q-image" src="" alt="Road sign" class="max-h-48 object-contain"/>
+      </div>
+      <h2 id="q-text" class="text-xl md:text-2xl font-semibold mb-8"></h2>
+      <div id="answer-options" class="space-y-4"></div>
+    </div>
+
+    <!-- Nav buttons -->
+    <div class="flex items-center justify-between pt-2">
+      <button onclick="navigate(-1)"
+        class="px-6 py-3 bg-white border border-gray-200 rounded-custom font-semibold text-gray-600 hover:bg-gray-50 flex items-center gap-2">
+        ← Previous
+      </button>
+      <div class="flex gap-4">
+        <button onclick="skipQuestion()"
+          class="px-8 py-3 bg-amber-100 text-amber-700 rounded-custom font-semibold hover:bg-amber-200">
+          Skip
+        </button>
+        <button onclick="navigate(1)"
+          class="px-10 py-3 bg-primary text-white rounded-custom font-semibold hover:opacity-90 shadow-md flex items-center gap-2">
+          Next →
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sidebar -->
+  <aside class="space-y-6">
+    <!-- Question navigator -->
+    <div class="bg-white p-6 rounded-custom shadow-sm border border-gray-100">
+      <h3 class="text-lg font-bold mb-4">Question Navigator</h3>
+      <div id="nav-grid" class="grid grid-cols-8 gap-1.5 mb-4"></div>
+      <div class="space-y-2 border-t border-gray-100 pt-4 text-sm text-gray-600">
+        <div class="flex items-center gap-2"><span class="w-3 h-3 status-answered rounded inline-block"></span>Answered</div>
+        <div class="flex items-center gap-2"><span class="w-3 h-3 status-skipped rounded inline-block"></span>Skipped</div>
+        <div class="flex items-center gap-2"><span class="w-3 h-3 status-current rounded inline-block"></span>Current</div>
+        <div class="flex items-center gap-2"><span class="w-3 h-3 status-unseen rounded inline-block"></span>Remaining</div>
+      </div>
+    </div>
+
+    <!-- Progress card -->
+    <div class="bg-primary text-white p-6 rounded-custom shadow-lg">
+      <h3 class="font-bold mb-2">Test Progress</h3>
+      <div class="w-full bg-white/20 h-2 rounded-full mb-3">
+        <div id="progress-bar" class="bg-white h-full rounded-full transition-all" style="width:0%"></div>
+      </div>
+      <p id="progress-text" class="text-sm opacity-90">0 of 64 Questions Answered</p>
+      <button onclick="finishTest()"
+        class="mt-4 w-full py-2 bg-white text-primary font-bold rounded-custom hover:opacity-90 transition-all">
+        Finish &amp; Submit Test
+      </button>
+    </div>
+  </aside>
+</main>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+const student = requireStudent();
+if (!student) throw new Error('Not authenticated');
+
+let questions = [];
+let answers = {};    // questionId -> chosen option or null (skipped)
+let visited = new Set();
+let currentIndex = 0;
+let timerInterval;
+let secondsLeft = 58 * 60;
+let startTime = Date.now();
+let testSubmitting = false;
+
+async function init() {
+  try {
+    questions = await apiFetch('/questions/test');
+    document.getElementById('loading-state').classList.add('hidden');
+    document.getElementById('test-content').classList.remove('hidden');
+    buildNavGrid();
+    renderQuestion(0);
+    startTimer();
+  } catch(e) {
+    document.getElementById('loading-state').innerHTML =
+      `<p class="text-red-500">Failed to load test: ${e.message}</p>`;
+  }
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    secondsLeft--;
+    const m = Math.floor(secondsLeft / 60).toString().padStart(2,'0');
+    const s = (secondsLeft % 60).toString().padStart(2,'0');
+    document.getElementById('timer-display').textContent = `${m}:${s}`;
+    if (secondsLeft <= 0) { clearInterval(timerInterval); finishTest(); }
+    if (secondsLeft <= 300) {
+      document.getElementById('test-timer').classList.replace('bg-red-50','bg-red-100');
+    }
+  }, 1000);
+}
+
+function buildNavGrid() {
+  const grid = document.getElementById('nav-grid');
+  grid.innerHTML = questions.map((q, i) => `
+    <button onclick="goToQuestion(${i})" id="nav-${i}"
+      class="aspect-square flex items-center justify-center text-xs rounded status-unseen font-medium">
+      ${i+1}
+    </button>
+  `).join('');
+}
+
+function renderQuestion(index) {
+  currentIndex = index;
+  visited.add(index);
+  const q = questions[index];
+
+  document.getElementById('q-counter').textContent = `Question ${index+1} of ${questions.length}`;
+  document.getElementById('q-category').textContent = q.category === 'Rules' ? 'Rules of the Road' : q.category === 'Signs' ? 'Road Signs' : 'Vehicle Controls';
+  document.getElementById('q-text').textContent = q.text;
+
+  const imgWrap = document.getElementById('q-image-wrap');
+  if (q.imageUrl) {
+    document.getElementById('q-image').src = q.imageUrl;
+    imgWrap.classList.remove('hidden');
+  } else {
+    imgWrap.classList.add('hidden');
+  }
+
+  // Render options
+  const opts = document.getElementById('answer-options');
+  opts.innerHTML = ['A','B','C','D'].map(opt => `
+    <label class="answer-opt flex items-center p-4 border-2 border-gray-100 rounded-custom cursor-pointer hover:border-blue-200"
+      id="opt-${opt}">
+      <input type="radio" name="k53-opt" value="${opt}" class="w-5 h-5 text-primary border-gray-300"
+        ${answers[q.id] === opt ? 'checked' : ''} onchange="selectAnswer('${opt}')"/>
+      <span class="ml-4 text-gray-700 font-medium">${opt}. ${q['option'+opt]}</span>
+    </label>
+  `).join('');
+
+  if (answers[q.id]) {
+    document.getElementById(`opt-${answers[q.id]}`)?.classList.add('selected');
+  }
+
+  updateNavGrid();
+  updateProgress();
+}
+
+function selectAnswer(opt) {
+  const q = questions[currentIndex];
+  answers[q.id] = opt;
+  // Highlight selected
+  ['A','B','C','D'].forEach(o => {
+    document.getElementById(`opt-${o}`)?.classList.toggle('selected', o === opt);
+  });
+  updateNavGrid();
+  updateProgress();
+}
+
+function skipQuestion() {
+  const q = questions[currentIndex];
+  answers[q.id] = null; // mark skipped
+  updateNavGrid();
+  navigate(1);
+}
+
+function navigate(dir) {
+  const next = currentIndex + dir;
+  if (next >= 0 && next < questions.length) renderQuestion(next);
+}
+
+function goToQuestion(i) { renderQuestion(i); }
+
+function updateNavGrid() {
+  questions.forEach((q, i) => {
+    const btn = document.getElementById(`nav-${i}`);
+    if (!btn) return;
+    btn.className = 'aspect-square flex items-center justify-center text-xs rounded font-medium';
+    if (i === currentIndex) btn.classList.add('status-current');
+    else if (answers[q.id] === null) btn.classList.add('status-skipped');
+    else if (answers[q.id]) btn.classList.add('status-answered');
+    else btn.classList.add('status-unseen');
+  });
+}
+
+function updateProgress() {
+  const answered = Object.values(answers).filter(v => v !== undefined && v !== null).length;
+  const pct = Math.round((answered / questions.length) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = `${answered} of ${questions.length} Questions Answered`;
+}
+
+async function finishTest() {
+  if (testSubmitting) return;
+  const answered = Object.keys(answers).length;
+  if (answered < questions.length) {
+    const ok = confirm(`You have ${questions.length - answered} unanswered questions. Submit anyway?`);
+    if (!ok) return;
+  }
+  testSubmitting = true;
+  clearInterval(timerInterval);
+
+  const duration = Math.floor((Date.now() - startTime) / 1000);
+  const answerList = questions.map(q => ({
+    questionId: q.id,
+    chosenOption: answers[q.id] || null
+  }));
+
+  try {
+    const result = await apiFetch('/tests/submit', {
+      method: 'POST',
+      body: JSON.stringify({ studentId: student.id, durationSeconds: duration, answers: answerList })
+    });
+    sessionStorage.setItem('lastResult', JSON.stringify(result));
+    window.location.href = 'results.html';
+  } catch(e) {
+    alert('Failed to submit test: ' + e.message);
+    testSubmitting = false;
+  }
+}
+
+init();
+</script>
+</body>
+</html>

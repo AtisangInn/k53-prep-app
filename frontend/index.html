@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>K53 Learners License Prep</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+  tailwind.config = {
+    theme: { extend: { colors: { primary: '#144bb8' }, fontFamily: { sans: ['Lexend','sans-serif'] }, borderRadius: { custom: '8px' } } }
+  }
+</script>
+<style>
+  body { background:#f9fafb; }
+  .action-card { transition: transform .2s, box-shadow .2s; }
+  .action-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0,0,0,.1); }
+  #admin-form { display:none; }
+  #admin-form.active { display:block; }
+  #error-msg { display:none; }
+</style>
+</head>
+<body class="font-sans antialiased min-h-screen flex flex-col">
+
+<!-- Admin toggle nav -->
+<nav class="relative z-10 p-4 flex justify-end">
+  <button onclick="document.getElementById('admin-form').classList.toggle('active')"
+    class="text-sm font-medium text-gray-500 hover:text-primary flex items-center gap-1 transition-colors">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+    </svg>
+    Admin Access
+  </button>
+</nav>
+
+<main class="flex-grow flex items-center justify-center p-6 -mt-12">
+  <div class="w-full max-w-md space-y-8">
+
+    <!-- Admin form (hidden by default) -->
+    <div id="admin-form" class="bg-blue-50 p-4 rounded-custom border border-blue-100">
+      <label class="block text-xs font-bold text-primary uppercase tracking-wider mb-2">Master Key / Admin Code</label>
+      <div class="flex gap-2">
+        <input id="admin-code" type="password" placeholder="Enter code"
+          class="block w-full px-3 py-2 rounded-custom border border-gray-300 shadow-sm text-sm focus:ring-primary focus:border-primary"/>
+        <button onclick="loginAdmin()"
+          class="bg-primary text-white px-4 py-2 rounded-custom text-sm font-semibold hover:bg-blue-700 transition-colors">
+          Login
+        </button>
+      </div>
+      <p id="admin-error" class="text-red-500 text-xs mt-2 hidden">Incorrect code. Try again.</p>
+    </div>
+
+    <!-- Header -->
+    <header class="text-center space-y-2">
+      <h1 class="text-3xl md:text-4xl font-bold text-primary tracking-tight">K53 Learners License Prep</h1>
+      <p class="text-gray-500 font-medium">Your journey to the road starts here</p>
+    </header>
+
+    <!-- Student ID -->
+    <section class="space-y-4">
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-2" for="user-id">Student Identification</label>
+        <input id="user-id" type="text" placeholder="Enter your Name and Phone Number e.g. John Doe - 082 123 4567"
+          class="block w-full px-4 py-3 rounded-custom border border-gray-300 shadow-sm text-base focus:ring-primary focus:border-primary"/>
+        <p class="mt-2 text-xs text-gray-400 italic">Your progress is tracked via the name and number you provide.</p>
+      </div>
+      <p id="error-msg" class="text-red-500 text-sm">Please enter your name and phone number before continuing.</p>
+    </section>
+
+    <!-- Action cards -->
+    <section class="grid grid-cols-1 gap-4">
+      <button onclick="go('study')"
+        class="action-card flex items-center p-6 bg-white border border-gray-100 rounded-custom shadow-sm hover:border-primary group text-left w-full">
+        <div class="flex-shrink-0 p-3 bg-blue-50 text-primary rounded-custom group-hover:bg-primary group-hover:text-white transition-colors">
+          <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+          </svg>
+        </div>
+        <div class="ml-5">
+          <h2 class="text-xl font-bold text-gray-900">Study Mode</h2>
+          <p class="text-gray-500 text-sm">Review rules and signs at your own pace.</p>
+        </div>
+      </button>
+
+      <button onclick="go('test')"
+        class="action-card flex items-center p-6 bg-white border border-gray-100 rounded-custom shadow-sm hover:border-primary group text-left w-full">
+        <div class="flex-shrink-0 p-3 bg-blue-50 text-primary rounded-custom group-hover:bg-primary group-hover:text-white transition-colors">
+          <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div class="ml-5">
+          <h2 class="text-xl font-bold text-gray-900">Take Practice Test</h2>
+          <p class="text-gray-500 text-sm">Challenge yourself with a timed 64-question mock exam.</p>
+        </div>
+      </button>
+    </section>
+
+  </div>
+</main>
+
+<footer class="py-6 text-center text-gray-400 text-sm">
+  <p>© 2025 K53 Prep Assistant. All rights reserved.</p>
+</footer>
+
+<script src="js/api.js"></script>
+<script>
+async function go(destination) {
+  const input = document.getElementById('user-id').value.trim();
+  const errMsg = document.getElementById('error-msg');
+
+  if (!input) {
+    errMsg.style.display = 'block';
+    return;
+  }
+  errMsg.style.display = 'none';
+
+  // Parse "Name - Phone"
+  const parts = input.split('-');
+  const name = parts[0]?.trim() || input;
+  const phone = parts[1]?.trim() || 'Unknown';
+
+  try {
+    const student = await apiFetch('/students/identify', {
+      method: 'POST',
+      body: JSON.stringify({ name, phone })
+    });
+    sessionStorage.setItem('student', JSON.stringify(student));
+    window.location.href = destination === 'study' ? 'study.html' : 'test.html';
+  } catch (e) {
+    alert('Could not connect to the server. Make sure the backend is running.\n\n' + e.message);
+  }
+}
+
+async function loginAdmin() {
+  const code = document.getElementById('admin-code').value;
+  const errEl = document.getElementById('admin-error');
+
+  // Test the code by making a quick admin request
+  try {
+    sessionStorage.setItem('adminCode', code);
+    await apiFetch('/students');
+    window.location.href = 'admin-dashboard.html';
+  } catch {
+    sessionStorage.removeItem('adminCode');
+    errEl.classList.remove('hidden');
+  }
+}
+
+// If already identified, prefill
+const existing = getStudent();
+if (existing) {
+  document.getElementById('user-id').value = `${existing.name} - ${existing.phone}`;
+}
+</script>
+</body>
+</html>

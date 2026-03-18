@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>K53 Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+  tailwind.config = {
+    theme: { extend: { colors:{ primary:'#144bb8' }, fontFamily:{ sans:['Lexend','sans-serif'] }, borderRadius:{ custom:'8px' } } }
+  }
+</script>
+<style>
+  body { background:#f9fafb; font-family:'Lexend',sans-serif; }
+  .nav-link { transition:background .15s,color .15s; }
+  .nav-link:hover { background:#f1f5ff; }
+  .nav-link.active { background:#eff4ff; color:#144bb8; font-weight:600; }
+  .stat-card { background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:1.25rem; }
+</style>
+</head>
+<body class="flex min-h-screen">
+
+<!-- Sidebar -->
+<aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full z-10">
+  <div class="p-6 border-b border-gray-100 flex items-center gap-3">
+    <div class="w-10 h-10 bg-primary flex items-center justify-center rounded-custom text-white">
+      <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+      </svg>
+    </div>
+    <h1 class="font-bold text-xl tracking-tight">K53 Admin</h1>
+  </div>
+  <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+    <a href="admin-dashboard.html" class="nav-link active flex items-center gap-3 px-4 py-3 rounded-custom text-sm">
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+      </svg>
+      Overview
+    </a>
+    <a href="admin-questions.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-custom text-sm text-gray-600">
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+      </svg>
+      Manage Questions
+    </a>
+    <a href="admin-students.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-custom text-sm text-gray-600">
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+      </svg>
+      Student Activity
+    </a>
+  </nav>
+  <div class="p-4 border-t border-gray-100">
+    <div class="flex items-center gap-3 px-4 py-2">
+      <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs font-bold">A</div>
+      <div>
+        <p class="text-sm font-semibold">Admin User</p>
+        <p class="text-xs text-gray-500">Master Control</p>
+      </div>
+    </div>
+    <button onclick="logout()"
+      class="mt-2 w-full text-xs text-gray-400 hover:text-red-500 transition-colors py-1">Sign out</button>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="flex-1 ml-64 p-8">
+  <header class="mb-8 flex justify-between items-end">
+    <div>
+      <h2 class="text-3xl font-bold text-gray-900">Dashboard Overview</h2>
+      <p class="text-gray-500 mt-1">Manage questions and monitor student progress.</p>
+    </div>
+    <a href="admin-questions.html"
+      class="bg-primary text-white px-4 py-2 rounded-custom font-medium shadow-sm hover:opacity-90 transition-opacity text-sm">
+      + Add Question
+    </a>
+  </header>
+
+  <!-- Stats row -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="stat-card">
+      <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Total Questions</p>
+      <p id="stat-questions" class="text-3xl font-bold text-primary mt-1">—</p>
+    </div>
+    <div class="stat-card">
+      <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Registered Students</p>
+      <p id="stat-students" class="text-3xl font-bold text-primary mt-1">—</p>
+    </div>
+    <div class="stat-card">
+      <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Tests Taken</p>
+      <p id="stat-tests" class="text-3xl font-bold text-primary mt-1">—</p>
+    </div>
+    <div class="stat-card">
+      <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Pass Rate</p>
+      <p id="stat-passrate" class="text-3xl font-bold text-green-600 mt-1">—</p>
+    </div>
+  </div>
+
+  <!-- Recent tests -->
+  <div class="bg-white rounded-custom border border-gray-200 shadow-sm p-6">
+    <h3 class="text-lg font-bold mb-4">Recent Test Results</h3>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-left border-b border-gray-100 text-gray-500 text-xs uppercase tracking-wider">
+            <th class="pb-3 pr-4">Student</th>
+            <th class="pb-3 pr-4">Date</th>
+            <th class="pb-3 pr-4">Rules</th>
+            <th class="pb-3 pr-4">Signs</th>
+            <th class="pb-3 pr-4">Controls</th>
+            <th class="pb-3">Result</th>
+          </tr>
+        </thead>
+        <tbody id="results-table" class="divide-y divide-gray-50"></tbody>
+      </table>
+    </div>
+    <p id="no-results" class="hidden text-center text-gray-400 py-8">No test results yet.</p>
+  </div>
+</main>
+
+<script src="js/api.js"></script>
+<script>
+requireAdmin();
+
+async function init() {
+  try {
+    const [students, questions, results] = await Promise.all([
+      apiFetch('/students'),
+      apiFetch('/questions'),
+      apiFetch('/tests/admin/all')
+    ]);
+
+    document.getElementById('stat-questions').textContent = questions.length;
+    document.getElementById('stat-students').textContent = students.length;
+    document.getElementById('stat-tests').textContent = results.length;
+
+    const passCount = results.filter(r => r.overallPass).length;
+    const passRate = results.length > 0 ? Math.round((passCount / results.length) * 100) : 0;
+    document.getElementById('stat-passrate').textContent = passRate + '%';
+
+    const tbody = document.getElementById('results-table');
+    if (results.length === 0) {
+      document.getElementById('no-results').classList.remove('hidden');
+    } else {
+      tbody.innerHTML = results.slice(0, 50).map(r => `
+        <tr class="hover:bg-gray-50 transition-colors">
+          <td class="py-3 pr-4 font-medium">${r.studentName} <span class="text-gray-400 text-xs font-normal">${r.studentPhone}</span></td>
+          <td class="py-3 pr-4 text-gray-500">${new Date(r.takenAt).toLocaleDateString('en-ZA')}</td>
+          <td class="py-3 pr-4">
+            <span class="${r.rulesScore >= 22 ? 'text-green-600' : 'text-red-500'} font-semibold">${r.rulesScore}/${r.rulesTotal}</span>
+          </td>
+          <td class="py-3 pr-4">
+            <span class="${r.signsScore >= 22 ? 'text-green-600' : 'text-red-500'} font-semibold">${r.signsScore}/${r.signsTotal}</span>
+          </td>
+          <td class="py-3 pr-4">
+            <span class="${r.controlsScore >= 6 ? 'text-green-600' : 'text-red-500'} font-semibold">${r.controlsScore}/${r.controlsTotal}</span>
+          </td>
+          <td class="py-3">
+            <span class="px-2 py-1 rounded-full text-xs font-bold ${r.overallPass ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+              ${r.overallPass ? 'PASS' : 'FAIL'}
+            </span>
+          </td>
+        </tr>
+      `).join('');
+    }
+  } catch(e) {
+    alert('Failed to load dashboard: ' + e.message);
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem('adminCode');
+  window.location.href = 'index.html';
+}
+
+init();
+</script>
+</body>
+</html>

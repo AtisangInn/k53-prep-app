@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>K53 Test Results</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+  tailwind.config = {
+    theme: { extend: {
+      colors: { primary:'#144bb8', pass:'#10b981', fail:'#ef4444' },
+      fontFamily: { sans:['Lexend','sans-serif'] },
+      borderRadius: { eight:'8px' }
+    }}
+  }
+</script>
+<style>
+  body { background:#f9fafb; font-family:'Lexend',sans-serif; }
+  .circular-track { stroke:#e2e8f0; stroke-width:10; fill:none; }
+  .circular-fill  { stroke:#144bb8; stroke-width:10; fill:none; stroke-linecap:round;
+                    transition:stroke-dashoffset .8s ease; transform:rotate(-90deg); transform-origin:50% 50%; }
+</style>
+</head>
+<body class="text-slate-800 antialiased">
+
+<main class="max-w-4xl mx-auto p-4 md:p-8 space-y-8">
+
+  <!-- Header -->
+  <header class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-bold tracking-tight text-slate-900">Test Results &amp; Insights</h1>
+      <p class="text-slate-500">Comprehensive breakdown of your practice session.</p>
+    </div>
+    <div class="flex gap-3">
+      <span id="result-date" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-eight shadow-sm text-sm font-semibold text-slate-700"></span>
+      <span id="overall-badge" class="flex items-center gap-2 px-4 py-2 rounded-eight text-sm font-bold"></span>
+    </div>
+  </header>
+
+  <!-- Metrics -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+    <!-- Readiness circle -->
+    <section class="md:col-span-1 bg-white p-6 rounded-eight shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center">
+      <h2 class="text-lg font-semibold mb-4">Overall Readiness</h2>
+      <div class="relative w-40 h-40 flex items-center justify-center">
+        <svg class="w-40 h-40 absolute top-0 left-0" viewBox="0 0 160 160">
+          <circle class="circular-track" cx="80" cy="80" r="66"/>
+          <circle id="readiness-arc" class="circular-fill" cx="80" cy="80" r="66"
+            stroke-dasharray="415" stroke-dashoffset="415"/>
+        </svg>
+        <div class="text-center z-10">
+          <span id="readiness-pct" class="block text-4xl font-bold text-primary">0%</span>
+          <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">Ready</span>
+        </div>
+      </div>
+      <p id="readiness-msg" class="mt-4 text-sm text-slate-500"></p>
+    </section>
+
+    <!-- Category performance -->
+    <section class="md:col-span-2 bg-white p-6 rounded-eight shadow-sm border border-slate-100">
+      <h2 class="text-lg font-semibold mb-4">Performance Summary</h2>
+      <div id="category-cards" class="space-y-4"></div>
+    </section>
+  </div>
+
+  <!-- Incorrect answers review -->
+  <section class="bg-white p-6 rounded-eight shadow-sm border border-slate-100">
+    <h2 class="text-lg font-semibold mb-2">Questions to Review</h2>
+    <p class="text-sm text-slate-500 mb-6">These are the questions you got wrong. Study them before your next attempt.</p>
+    <div id="wrong-answers" class="space-y-4"></div>
+    <p id="all-correct-msg" class="hidden text-green-600 font-semibold text-center py-8">🎉 You got every question correct!</p>
+  </section>
+
+  <!-- Actions -->
+  <div class="flex flex-col sm:flex-row gap-4">
+    <a href="test.html" class="flex-1 py-3 bg-primary text-white font-bold rounded-eight text-center hover:opacity-90 transition-opacity shadow-md">
+      Retake Practice Test
+    </a>
+    <a href="study.html" class="flex-1 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-eight text-center hover:bg-slate-50 transition-colors">
+      Go to Study Mode
+    </a>
+    <a href="index.html" class="flex-1 py-3 bg-white border border-slate-200 text-slate-500 font-bold rounded-eight text-center hover:bg-slate-50 transition-colors">
+      ← Home
+    </a>
+  </div>
+
+</main>
+
+<script src="js/api.js"></script>
+<script>
+requireStudent();
+
+const result = JSON.parse(sessionStorage.getItem('lastResult') || 'null');
+if (!result) { window.location.href = 'index.html'; }
+
+function render() {
+  // Date
+  document.getElementById('result-date').textContent =
+    '📅 ' + new Date(result.takenAt).toLocaleDateString('en-ZA', { day:'numeric', month:'short', year:'numeric' });
+
+  // Overall badge
+  const badge = document.getElementById('overall-badge');
+  if (result.overallPass) {
+    badge.textContent = '✅ OVERALL PASS';
+    badge.className = 'flex items-center gap-2 px-4 py-2 rounded-eight text-sm font-bold bg-green-100 text-green-700';
+  } else {
+    badge.textContent = '❌ OVERALL FAIL';
+    badge.className = 'flex items-center gap-2 px-4 py-2 rounded-eight text-sm font-bold bg-red-100 text-red-700';
+  }
+
+  // Readiness %
+  const totalScore  = result.rulesScore + result.signsScore + result.controlsScore;
+  const totalPossible = result.rulesTotal + result.signsTotal + result.controlsTotal;
+  const pct = totalPossible > 0 ? Math.round((totalScore / totalPossible) * 100) : 0;
+  document.getElementById('readiness-pct').textContent = pct + '%';
+  // Animate arc (circumference = 2π×66 ≈ 415)
+  const offset = 415 - (415 * pct / 100);
+  setTimeout(() => { document.getElementById('readiness-arc').style.strokeDashoffset = offset; }, 100);
+
+  const msgs = pct >= 80 ? 'Great work! You\'re nearly exam-ready.' :
+               pct >= 60 ? 'Getting closer! Focus on your weak categories.' :
+               'Keep studying — you\'ll get there!';
+  document.getElementById('readiness-msg').textContent = msgs;
+
+  // Category cards
+  const cats = [
+    { label:'Rules of the Road', score:result.rulesScore,    total:result.rulesTotal,    min:22 },
+    { label:'Road Signs',        score:result.signsScore,    total:result.signsTotal,    min:22 },
+    { label:'Vehicle Controls',  score:result.controlsScore, total:result.controlsTotal, min:6  },
+  ];
+  document.getElementById('category-cards').innerHTML = cats.map(c => {
+    const pass = c.score >= c.min;
+    const barPct = c.total > 0 ? Math.round((c.score / c.total) * 100) : 0;
+    return `
+    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-eight border-l-4 ${pass ? 'border-pass' : 'border-fail'}">
+      <div class="flex items-center gap-3">
+        <div class="p-2 ${pass ? 'bg-green-100 text-pass' : 'bg-red-100 text-fail'} rounded-full">
+          ${pass
+            ? '<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>'
+            : '<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>'
+          }
+        </div>
+        <div>
+          <p class="font-bold text-slate-900">${c.label}</p>
+          <p class="text-xs text-slate-500">Min required: ${c.min}/${c.total}</p>
+          <div class="mt-1 w-48 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+            <div class="h-full ${pass ? 'bg-pass' : 'bg-fail'} rounded-full" style="width:${barPct}%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="text-right">
+        <p class="text-xl font-bold ${pass ? 'text-pass' : 'text-fail'}">${c.score}/${c.total}</p>
+        <span class="text-xs font-bold uppercase px-2 py-0.5 rounded-full ${pass ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${pass ? 'PASS' : 'FAIL'}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Wrong answers
+  const wrong = (result.answers || []).filter(a => !a.isCorrect);
+  const wrongEl = document.getElementById('wrong-answers');
+  if (wrong.length === 0) {
+    wrongEl.classList.add('hidden');
+    document.getElementById('all-correct-msg').classList.remove('hidden');
+  } else {
+    wrongEl.innerHTML = wrong.map(a => `
+      <div class="p-4 bg-slate-50 rounded-eight border border-slate-100">
+        <div class="flex items-start justify-between gap-4 flex-wrap">
+          <div class="flex-1">
+            <span class="text-xs font-bold text-fail uppercase tracking-wider">${a.category}</span>
+            <p class="font-medium text-slate-900 mt-1 leading-tight">${a.questionText}</p>
+            <p class="text-sm text-slate-500 mt-1">
+              Your Answer: <span class="text-fail line-through">${a.chosenOption ? a.chosenOption + ' — incorrect' : 'Skipped'}</span>
+              &nbsp;·&nbsp; Correct: <span class="text-pass font-semibold">${a.correctOption}</span>
+            </p>
+            <p class="text-xs text-slate-400 mt-1 italic">${a.explanation}</p>
+          </div>
+          <a href="study.html"
+            class="shrink-0 inline-flex items-center px-3 py-1.5 bg-primary/10 text-primary font-semibold text-xs rounded-eight hover:bg-primary hover:text-white transition-colors">
+            Study this →
+          </a>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+render();
+</script>
+</body>
+</html>

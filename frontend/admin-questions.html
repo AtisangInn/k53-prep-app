@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>K53 Admin – Manage Questions</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+  tailwind.config = {
+    theme: { extend: { colors:{ primary:'#144bb8' }, fontFamily:{ sans:['Lexend','sans-serif'] }, borderRadius:{ custom:'8px' } } }
+  }
+</script>
+<style>
+  body { background:#f9fafb; font-family:'Lexend',sans-serif; }
+  .nav-link { transition:background .15s,color .15s; }
+  .nav-link:hover { background:#f1f5ff; }
+  .nav-link.active { background:#eff4ff; color:#144bb8; font-weight:600; }
+  #modal-overlay { display:none; }
+  #modal-overlay.open { display:flex; }
+</style>
+</head>
+<body class="flex min-h-screen">
+
+<!-- Sidebar (same as dashboard) -->
+<aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full z-10">
+  <div class="p-6 border-b border-gray-100 flex items-center gap-3">
+    <div class="w-10 h-10 bg-primary flex items-center justify-center rounded-custom text-white">
+      <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+      </svg>
+    </div>
+    <h1 class="font-bold text-xl tracking-tight">K53 Admin</h1>
+  </div>
+  <nav class="flex-1 p-4 space-y-1">
+    <a href="admin-dashboard.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-custom text-sm text-gray-600">
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+      Overview
+    </a>
+    <a href="admin-questions.html" class="nav-link active flex items-center gap-3 px-4 py-3 rounded-custom text-sm">
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+      Manage Questions
+    </a>
+    <a href="admin-students.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-custom text-sm text-gray-600">
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+      Student Activity
+    </a>
+  </nav>
+  <div class="p-4 border-t border-gray-100">
+    <button onclick="logout()" class="w-full text-xs text-gray-400 hover:text-red-500 transition-colors py-1">Sign out</button>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="flex-1 ml-64 p-8">
+  <header class="flex justify-between items-center mb-8">
+    <div>
+      <h2 class="text-3xl font-bold tracking-tight">Question Database</h2>
+      <p id="q-count-label" class="text-slate-500 mt-1">Loading...</p>
+    </div>
+    <button onclick="openModal(null)"
+      class="bg-primary text-white px-5 py-2.5 rounded-custom font-bold flex items-center gap-2 hover:opacity-90 transition-opacity shadow-md text-sm">
+      + Add Question
+    </button>
+  </header>
+
+  <!-- Filters -->
+  <div class="flex gap-3 mb-6 flex-wrap">
+    <input id="search-input" type="text" placeholder="Search questions..."
+      class="flex-1 min-w-48 px-4 py-2 rounded-custom border border-gray-200 text-sm focus:ring-primary focus:border-primary"
+      oninput="filterTable()"/>
+    <select id="cat-filter" class="px-3 py-2 rounded-custom border border-gray-200 text-sm focus:ring-primary" onchange="filterTable()">
+      <option value="">All Categories</option>
+      <option value="Rules">Rules of the Road</option>
+      <option value="Signs">Road Signs</option>
+      <option value="Controls">Vehicle Controls</option>
+    </select>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white rounded-custom border border-gray-200 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 border-b border-gray-200">
+          <tr class="text-left text-gray-500 text-xs uppercase tracking-wider">
+            <th class="px-4 py-3">ID</th>
+            <th class="px-4 py-3">Category</th>
+            <th class="px-4 py-3">Question</th>
+            <th class="px-4 py-3">Correct</th>
+            <th class="px-4 py-3 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="q-table" class="divide-y divide-gray-50"></tbody>
+      </table>
+    </div>
+    <p id="empty-msg" class="hidden text-center text-gray-400 py-10">No questions found.</p>
+  </div>
+</main>
+
+<!-- Add/Edit Modal (uses normal flow, not fixed) -->
+<div id="modal-overlay"
+  class="fixed inset-0 bg-black/40 z-50 items-start justify-center pt-16 px-4 overflow-y-auto"
+  onclick="if(event.target===this)closeModal()">
+  <div class="bg-white rounded-custom w-full max-w-xl shadow-xl mb-8">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <h3 id="modal-title" class="text-lg font-bold">Add New Question</h3>
+      <button onclick="closeModal()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+    </div>
+    <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+      <input type="hidden" id="edit-id"/>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Category *</label>
+          <select id="f-category" class="mt-1 block w-full rounded-custom border-gray-300 text-sm focus:ring-primary">
+            <option value="Rules">Rules of the Road</option>
+            <option value="Signs">Road Signs</option>
+            <option value="Controls">Vehicle Controls</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Sub-Category *</label>
+          <input id="f-subcategory" type="text" placeholder="e.g. Speed Limits"
+            class="mt-1 block w-full rounded-custom border-gray-300 text-sm focus:ring-primary"/>
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Question Text *</label>
+        <textarea id="f-text" rows="3" placeholder="Enter the question..."
+          class="mt-1 block w-full rounded-custom border-gray-300 text-sm focus:ring-primary"></textarea>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Image URL (optional)</label>
+        <input id="f-imageurl" type="url" placeholder="https://..."
+          class="mt-1 block w-full rounded-custom border-gray-300 text-sm focus:ring-primary"/>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Option A *</label>
+          <input id="f-optA" type="text" class="mt-1 block w-full rounded-custom border-gray-300 text-sm focus:ring-primary"/>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Option B *</label>
+          <input id="f-optB" type="text" class="mt-1 block w-full rounded-custom border-gray-300 text-sm focus:ring-primary"/>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Option C *</label>
+          <input id="f-optC" type="text" class="mt-1 block w-full rounded-custom border-gray-300 text-sm focus:ring-primary"/>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Option D *</label>
+          <input id="f-optD" type="text" class="mt-1 block w-full rounded-custom border-gray-300 text-sm focus:ring-primary"/>
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Correct Answer *</label>
+        <select id="f-correct" class="mt-1 block w-full rounded-custom border-gray-300 text-sm focus:ring-primary">
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+          <option value="D">D</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Explanation *</label>
+        <textarea id="f-explanation" rows="3" placeholder="Explain why the correct answer is correct..."
+          class="mt-1 block w-full rounded-custom border-gray-300 text-sm focus:ring-primary"></textarea>
+      </div>
+      <p id="form-error" class="hidden text-red-500 text-sm"></p>
+    </div>
+    <div class="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+      <button onclick="closeModal()"
+        class="px-4 py-2 rounded-custom border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50">Cancel</button>
+      <button onclick="saveQuestion()"
+        class="px-6 py-2 rounded-custom bg-primary text-white text-sm font-bold hover:opacity-90 shadow-sm">Save Question</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+requireAdmin();
+
+let allQuestions = [];
+
+async function init() {
+  allQuestions = await apiFetch('/questions');
+  renderTable(allQuestions);
+}
+
+function renderTable(qs) {
+  const tbody = document.getElementById('q-table');
+  document.getElementById('q-count-label').textContent = `${qs.length} active questions across 3 categories`;
+  if (qs.length === 0) {
+    tbody.innerHTML = '';
+    document.getElementById('empty-msg').classList.remove('hidden');
+    return;
+  }
+  document.getElementById('empty-msg').classList.add('hidden');
+  tbody.innerHTML = qs.map(q => `
+    <tr class="hover:bg-gray-50 transition-colors">
+      <td class="px-4 py-3 text-gray-400 font-mono text-xs">#${q.id}</td>
+      <td class="px-4 py-3">
+        <span class="px-2 py-1 rounded-full text-xs font-semibold
+          ${q.category==='Rules' ? 'bg-blue-100 text-blue-700' :
+            q.category==='Signs' ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}">
+          ${q.category}
+        </span>
+      </td>
+      <td class="px-4 py-3 text-gray-700 max-w-xs truncate" title="${q.text}">${q.text}</td>
+      <td class="px-4 py-3 font-bold text-primary">${q.correctOption || '?'}</td>
+      <td class="px-4 py-3 text-right space-x-2">
+        <button onclick="openModal(${q.id})"
+          class="text-xs px-3 py-1 rounded border border-gray-200 hover:bg-gray-50 text-gray-600 font-medium">Edit</button>
+        <button onclick="deleteQuestion(${q.id})"
+          class="text-xs px-3 py-1 rounded border border-red-200 hover:bg-red-50 text-red-500 font-medium">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filterTable() {
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const cat = document.getElementById('cat-filter').value;
+  const filtered = allQuestions.filter(q =>
+    (!cat || q.category === cat) &&
+    (!search || q.text.toLowerCase().includes(search) || q.subCategory?.toLowerCase().includes(search))
+  );
+  renderTable(filtered);
+}
+
+function openModal(id) {
+  const overlay = document.getElementById('modal-overlay');
+  overlay.classList.add('open');
+
+  if (!id) {
+    document.getElementById('modal-title').textContent = 'Add New Question';
+    document.getElementById('edit-id').value = '';
+    ['category','subcategory','text','imageurl','optA','optB','optC','optD','correct','explanation'].forEach(f => {
+      const el = document.getElementById('f-' + f);
+      if (el) el.value = f === 'correct' ? 'A' : '';
+    });
+    return;
+  }
+
+  // Find the full question — need to re-fetch to get correctOption for admin
+  const q = allQuestions.find(q => q.id === id);
+  if (!q) return;
+  document.getElementById('modal-title').textContent = 'Edit Question';
+  document.getElementById('edit-id').value = q.id;
+  document.getElementById('f-category').value = q.category;
+  document.getElementById('f-subcategory').value = q.subCategory || '';
+  document.getElementById('f-text').value = q.text;
+  document.getElementById('f-imageurl').value = q.imageUrl || '';
+  document.getElementById('f-optA').value = q.optionA;
+  document.getElementById('f-optB').value = q.optionB;
+  document.getElementById('f-optC').value = q.optionC;
+  document.getElementById('f-optD').value = q.optionD;
+  document.getElementById('f-correct').value = q.correctOption || 'A';
+  document.getElementById('f-explanation').value = q.explanation || '';
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.getElementById('form-error').classList.add('hidden');
+}
+
+async function saveQuestion() {
+  const id = document.getElementById('edit-id').value;
+  const payload = {
+    category:    document.getElementById('f-category').value,
+    subCategory: document.getElementById('f-subcategory').value,
+    text:        document.getElementById('f-text').value.trim(),
+    imageUrl:    document.getElementById('f-imageurl').value.trim() || null,
+    optionA:     document.getElementById('f-optA').value.trim(),
+    optionB:     document.getElementById('f-optB').value.trim(),
+    optionC:     document.getElementById('f-optC').value.trim(),
+    optionD:     document.getElementById('f-optD').value.trim(),
+    correctOption: document.getElementById('f-correct').value,
+    explanation: document.getElementById('f-explanation').value.trim()
+  };
+
+  const errEl = document.getElementById('form-error');
+  if (!payload.text || !payload.optionA || !payload.optionB || !payload.optionC || !payload.optionD || !payload.explanation) {
+    errEl.textContent = 'Please fill in all required fields.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+  errEl.classList.add('hidden');
+
+  try {
+    if (id) {
+      await apiFetch(`/questions/${id}`, { method:'PUT', body: JSON.stringify(payload) });
+    } else {
+      await apiFetch('/questions', { method:'POST', body: JSON.stringify(payload) });
+    }
+    closeModal();
+    allQuestions = await apiFetch('/questions');
+    renderTable(allQuestions);
+  } catch(e) {
+    errEl.textContent = 'Save failed: ' + e.message;
+    errEl.classList.remove('hidden');
+  }
+}
+
+async function deleteQuestion(id) {
+  if (!confirm('Delete this question? This action cannot be undone.')) return;
+  try {
+    await apiFetch(`/questions/${id}`, { method:'DELETE' });
+    allQuestions = allQuestions.filter(q => q.id !== id);
+    renderTable(allQuestions);
+  } catch(e) {
+    alert('Delete failed: ' + e.message);
+  }
+}
+
+function logout() { sessionStorage.removeItem('adminCode'); window.location.href = 'index.html'; }
+
+init();
+</script>
+</body>
+</html>

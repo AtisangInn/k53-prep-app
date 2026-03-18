@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>K53 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+  tailwind.config = {
+    theme: { extend: { colors: { primary: '#144bb8' }, fontFamily: { sans: ['Lexend','sans-serif'] }, borderRadius: { custom: '8px' } } }
+  }
+</script>
+<style>
+  body { background:#f9fafb; overflow:hidden; }
+  .sidebar-h { height: calc(100vh - 64px); overflow-y: auto; }
+  .main-h   { height: calc(100vh - 64px); overflow-y: auto; }
+  .cat-btn { cursor:pointer; transition:background .15s; }
+  .cat-btn:hover { background:#f8faff; }
+  .cat-btn.active { background:#eff4ff; color:#144bb8; font-weight:600; }
+  .answer-option { transition:border .15s,background .15s; }
+  .answer-option.selected { border-color:#144bb8; background:#eff4ff; }
+  .answer-option.correct  { border-color:#10b981; background:#f0fdf4; }
+  .answer-option.wrong    { border-color:#ef4444; background:#fef2f2; }
+  .scrollbar::-webkit-scrollbar { width:4px; }
+  .scrollbar::-webkit-scrollbar-thumb { background:#d1d5db; border-radius:2px; }
+</style>
+</head>
+<body class="font-sans antialiased text-gray-900">
+
+<!-- Header -->
+<header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-50">
+  <div class="flex items-center gap-3">
+    <div class="bg-primary p-2 rounded-custom">
+      <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+      </svg>
+    </div>
+    <h1 class="text-xl font-bold tracking-tight text-slate-800">K53 Study Master</h1>
+  </div>
+  <div class="flex items-center gap-4">
+    <span id="progress-label" class="text-sm font-medium text-slate-500">Loading...</span>
+    <a href="index.html" class="text-sm text-gray-400 hover:text-primary transition-colors">← Back</a>
+  </div>
+</header>
+
+<div class="flex">
+  <!-- Sidebar -->
+  <aside class="w-72 bg-white border-r border-slate-200 sidebar-h scrollbar shrink-0">
+    <nav class="p-4 space-y-6">
+      <div>
+        <h2 class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Categories</h2>
+        <div id="category-nav" class="space-y-1"></div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main content -->
+  <main class="flex-1 main-h scrollbar">
+    <div id="loading" class="flex items-center justify-center h-64 text-gray-400">Loading questions...</div>
+    <div id="questions-container" class="p-8 space-y-8 hidden"></div>
+  </main>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+const student = requireStudent();
+if (!student) throw new Error('Not authenticated');
+
+let allQuestions = [];
+let activeCategory = 'Rules';
+
+const categories = [
+  { key: 'Handbook', label: 'Complete K53 Handbook', icon: '📖' },
+  { key: 'Rules',    label: 'Rules of the Road',  icon: '📋' },
+  { key: 'Signs',    label: 'Road Signs',          icon: '🚦' },
+  { key: 'Controls', label: 'Vehicle Controls',    icon: '🚗' },
+];
+
+async function init() {
+  try {
+    allQuestions = await apiFetch('/questions');
+    renderNav();
+    showCategory('Handbook');
+  } catch (e) {
+    document.getElementById('loading').textContent = 'Failed to load: ' + e.message;
+  }
+}
+
+function renderNav() {
+  const nav = document.getElementById('category-nav');
+  nav.innerHTML = categories.map(c => {
+    const count = allQuestions.filter(q => q.category === c.key).length;
+    const badge = c.key === 'Handbook' ? '' : `<span class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">${count}</span>`;
+    return `<button onclick="showCategory('${c.key}')" id="cat-${c.key}"
+      class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-custom text-slate-700 text-sm">
+      <div class="flex items-center gap-3">
+        <span>${c.icon}</span>
+        <span>${c.label}</span>
+      </div>
+      ${badge}
+    </button>`;
+  }).join('');
+}
+
+function showCategory(cat) {
+  activeCategory = cat;
+
+  // Update nav highlight
+  categories.forEach(c => {
+    document.getElementById(`cat-${c.key}`)?.classList.toggle('active', c.key === cat);
+  });
+
+  const container = document.getElementById('questions-container');
+  const loading = document.getElementById('loading');
+
+  loading.classList.add('hidden');
+  container.classList.remove('hidden');
+
+  if (cat === 'Handbook') {
+    document.getElementById('progress-label').textContent = `Complete K53 Handbook`;
+    container.innerHTML = `
+      <div class="bg-white rounded-custom border border-gray-100 shadow-sm h-[80vh] overflow-hidden">
+        <iframe src="docs/iDriving-School-K53_optimized.pdf" class="w-full h-full border-0"></iframe>
+      </div>
+    `;
+    return;
+  }
+
+  const questions = allQuestions.filter(q => q.category === cat);
+  const answered = Object.keys(sessionStorage).filter(k => k.startsWith('ans-')).length;
+  const total = allQuestions.length;
+  document.getElementById('progress-label').textContent = `Studied: ${answered}/${total}`;
+
+  container.innerHTML = questions.map((q, i) => `
+    <div class="bg-white rounded-custom border border-gray-100 shadow-sm p-6 md:p-8">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="text-xs font-semibold text-primary uppercase tracking-wider">${q.subCategory}</span>
+        <span class="text-xs text-gray-400">Q${i+1}</span>
+      </div>
+      ${q.imageUrl ? `<div class="mb-6 flex justify-center bg-gray-50 p-4 rounded-custom border border-dashed border-gray-200">
+        <img src="${q.imageUrl}" alt="Road sign" class="max-h-40 object-contain"/>
+      </div>` : ''}
+      <h2 class="text-lg font-semibold mb-6">${q.text}</h2>
+      <div class="space-y-3" id="opts-${q.id}">
+        ${['A','B','C','D'].map(opt => `
+          <label class="answer-option flex items-center p-4 border-2 border-gray-100 rounded-custom cursor-pointer group"
+            id="opt-${q.id}-${opt}" onclick="selectAnswer(${q.id}, '${opt}', this)">
+            <input type="radio" name="q-${q.id}" value="${opt}" class="w-5 h-5 text-primary border-gray-300 focus:ring-primary"/>
+            <span class="ml-4 text-gray-700 font-medium">${opt}. ${q['option'+opt]}</span>
+          </label>
+        `).join('')}
+      </div>
+      <div id="explanation-${q.id}" class="hidden mt-4 p-4 bg-blue-50 border border-blue-100 rounded-custom">
+        <p class="text-sm font-semibold text-primary mb-1">Explanation</p>
+        <p class="text-sm text-gray-700" id="explanation-text-${q.id}"></p>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function selectAnswer(questionId, chosen, labelEl) {
+  // Prevent re-answering
+  if (sessionStorage.getItem(`ans-${questionId}`)) return;
+  sessionStorage.setItem(`ans-${questionId}`, chosen);
+
+  try {
+    const result = await apiFetch(`/questions/${questionId}/answer`);
+    const correct = result.correctOption;
+
+    // Colour feedback
+    ['A','B','C','D'].forEach(opt => {
+      const el = document.getElementById(`opt-${questionId}-${opt}`);
+      if (!el) return;
+      if (opt === correct) { el.classList.add('correct'); }
+      else if (opt === chosen && opt !== correct) { el.classList.add('wrong'); }
+    });
+
+    // Show explanation
+    const expEl = document.getElementById(`explanation-${questionId}`);
+    document.getElementById(`explanation-text-${questionId}`).textContent = result.explanation;
+    expEl?.classList.remove('hidden');
+
+    // Update progress
+    const answered = Object.keys(sessionStorage).filter(k => k.startsWith('ans-')).length;
+    document.getElementById('progress-label').textContent = `Studied: ${answered}/${allQuestions.length}`;
+  } catch (e) {
+    alert('Error fetching answer: ' + e.message);
+  }
+}
+
+init();
+</script>
+</body>
+</html>

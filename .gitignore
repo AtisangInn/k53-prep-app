@@ -1,0 +1,7 @@
+backend/k53prep.db
+backend/bin/
+backend/obj/
+backend/*.db-shm
+backend/*.db-wal
+.DS_Store
+node_modules/
