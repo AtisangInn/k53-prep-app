@@ -149,7 +149,6 @@ public class TestsController : ControllerBase
 
             result.Answers.Add(new TestAnswer {
                 QuestionId = answer.QuestionId,
-                KnownQuestionId = q.Id, // Link to original question
                 ChosenOption = answer.ChosenOption,
                 IsCorrect = isCorrect
             });

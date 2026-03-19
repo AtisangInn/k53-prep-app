@@ -1,2 +1,11 @@
 [variables]
-NIXPACKS_DOTNET_SDK_VERSION = '8.0'
+NIXPACKS_DOTNET_SDK_VERSION = '8.0.100-preview.5.23303.2'
+
+[phases.install]
+cmds = ["dotnet restore backend/K53PrepApp.Api.csproj"]
+
+[phases.build]
+cmds = ["dotnet publish backend/K53PrepApp.Api.csproj -c Release -o out"]
+
+[start]
+cmd = "dotnet out/K53PrepApp.Api.dll --urls http://0.0.0.0:$PORT"
