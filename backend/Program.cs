@@ -11,25 +11,47 @@ try
     builder.Services.AddEndpointsApiExplorer();
 
     // --- Database: PostgreSQL in production, SQLite locally ---
-    var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
-    if (!string.IsNullOrEmpty(connectionString))
+    var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+    string connectionString;
+
+    if (!string.IsNullOrEmpty(databaseUrl))
     {
-        Console.WriteLine("Production: Using PostgreSQL database...");
-        if (connectionString.StartsWith("postgres://"))
-        {
+        Console.WriteLine("Production: Using PostgreSQL database context...");
+        
+        // Handle postgres:// or postgresql://
             try 
             {
-                var uri = new Uri(connectionString);
-                var userInfo = uri.UserInfo.Split(':');
-                var user = userInfo[0];
-                var pass = userInfo.Length > 1 ? userInfo[1] : "";
-                connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={user};Password={pass};SSL Mode=Require;Trust Server Certificate=true";
+                var uri = new Uri(databaseUrl);
+                string user, password;
+                var userInfo = uri.UserInfo;
+                var firstColon = userInfo.IndexOf(':');
+                if (firstColon >= 0)
+                {
+                    user = userInfo.Substring(0, firstColon);
+                    password = userInfo.Substring(firstColon + 1);
+                }
+                else
+                {
+                    user = userInfo;
+                    password = "";
+                }
+                var host = uri.Host;
+                var port = uri.Port > 0 ? uri.Port : 5432;
+                var database = uri.AbsolutePath.TrimStart('/');
+                
+                connectionString = $"Host={host};Port={port};Database={database};Username={user};Password={password};SSL Mode=Require;Trust Server Certificate=true";
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error parsing DATABASE_URL: {ex.Message}");
+                Console.WriteLine($"Error parsing DATABASE_URL URI, using raw string: {ex.Message}");
+                connectionString = databaseUrl;
             }
         }
+        else 
+        {
+            connectionString = databaseUrl;
+        }
+        
         builder.Services.AddDbContext<AppDbContext>(opt => opt.UseNpgsql(connectionString));
     }
     else
