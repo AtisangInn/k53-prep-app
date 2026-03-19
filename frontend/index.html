@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Godu Godu Driving School</title>
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script src="https://cdn.tailwindcss.com/3.4.1?plugins=forms"></script>
 <script>
   tailwind.config = {
     theme: { extend: { colors: { primary: '#c1272d' }, fontFamily: { sans: ['Lexend','sans-serif'] }, borderRadius: { custom: '8px' } } }
@@ -48,7 +48,7 @@
           Login
         </button>
       </div>
-      <p id="admin-error" class="text-red-500 text-xs mt-2 hidden">Incorrect code. Try again.</p>
+      <p id="admin-error" class="text-red-500 text-xs mt-2 hidden" style="display:none;">Incorrect code. Try again.</p>
     </div>
 
     <!-- Header -->
@@ -103,7 +103,7 @@
 </main>
 
 <footer class="py-6 text-center text-gray-400 text-sm">
-  <p>© 2025 Godu Godu Driving School. All rights reserved.</p>
+  <p>© <span id="year"></span> Godu Godu Driving School. All rights reserved.</p>
 </footer>
 
 <script src="assets/js/api.js"></script>
@@ -151,10 +151,10 @@ async function loginAdmin() {
 }
 
 // If already identified, prefill
-const existing = getStudent();
 if (existing) {
   document.getElementById('user-id').value = `${existing.name} - ${existing.phone}`;
 }
+document.getElementById('year').textContent = new Date().getFullYear();
 </script>
 </body>
 </html>
