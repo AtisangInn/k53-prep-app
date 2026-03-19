@@ -2,6 +2,9 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "NIXPACKS",
-    "rootDirectory": "backend"
+    "rootDirectory": "backend",
+    "env": {
+      "NIXPACKS_DOTNET_SDK_VERSION": "8"
+    }
   }
 }
