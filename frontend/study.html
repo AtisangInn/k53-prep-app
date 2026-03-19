@@ -82,7 +82,16 @@ async function init() {
   try {
     allQuestions = await apiFetch('/questions');
     renderNav();
-    showCategory('Handbook');
+    
+    // Check for category in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const catParam = urlParams.get('category');
+    
+    if (catParam && categories.some(c => c.key === catParam)) {
+      showCategory(catParam);
+    } else {
+      showCategory('Handbook');
+    }
   } catch (e) {
     document.getElementById('loading').textContent = 'Failed to load: ' + e.message;
   }
