@@ -2,7 +2,7 @@
 const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 const API_BASE = IS_LOCAL 
   ? 'http://localhost:5000/api' 
-  : 'https://YOUR-RAILWAY-APP-NAME.railway.app/api'; 
+  : 'https://k53-prep-app-production.up.railway.app/api'; 
 
 function getAdminCode() {
   return sessionStorage.getItem('adminCode') || '';
