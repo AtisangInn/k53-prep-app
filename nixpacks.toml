@@ -8,4 +8,4 @@ cmds = ["dotnet restore backend/K53PrepApp.Api.csproj"]
 cmds = ["dotnet publish backend/K53PrepApp.Api.csproj -c Release -o out"]
 
 [start]
-cmd = "dotnet out/K53PrepApp.Api.dll --urls http://0.0.0.0:$PORT"
+cmd = "cd out && dotnet K53PrepApp.Api.dll --urls http://0.0.0.0:$PORT"
