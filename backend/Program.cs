@@ -17,38 +17,31 @@ try
     if (!string.IsNullOrEmpty(databaseUrl))
     {
         Console.WriteLine("Production: Using PostgreSQL database context...");
-        
-        // Handle postgres:// or postgresql://
-            try 
-            {
-                var uri = new Uri(databaseUrl);
-                string user, password;
-                var userInfo = uri.UserInfo;
-                var firstColon = userInfo.IndexOf(':');
-                if (firstColon >= 0)
-                {
-                    user = userInfo.Substring(0, firstColon);
-                    password = userInfo.Substring(firstColon + 1);
-                }
-                else
-                {
-                    user = userInfo;
-                    password = "";
-                }
-                var host = uri.Host;
-                var port = uri.Port > 0 ? uri.Port : 5432;
-                var database = uri.AbsolutePath.TrimStart('/');
-                
-                connectionString = $"Host={host};Port={port};Database={database};Username={user};Password={password};SSL Mode=Require;Trust Server Certificate=true";
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error parsing DATABASE_URL URI, using raw string: {ex.Message}");
-                connectionString = databaseUrl;
-            }
-        }
-        else 
+        try 
         {
+            var uri = new Uri(databaseUrl);
+            string user, password;
+            var userInfo = uri.UserInfo;
+            var firstColon = userInfo.IndexOf(':');
+            if (firstColon >= 0)
+            {
+                user = userInfo.Substring(0, firstColon);
+                password = userInfo.Substring(firstColon + 1);
+            }
+            else
+            {
+                user = userInfo;
+                password = "";
+            }
+            var host = uri.Host;
+            var port = uri.Port > 0 ? uri.Port : 5432;
+            var database = uri.AbsolutePath.TrimStart('/');
+            
+            connectionString = $"Host={host};Port={port};Database={database};Username={user};Password={password};SSL Mode=Require;Trust Server Certificate=true";
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error parsing DATABASE_URL URI, using raw string: {ex.Message}");
             connectionString = databaseUrl;
         }
         
