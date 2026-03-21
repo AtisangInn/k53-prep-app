@@ -120,6 +120,49 @@ public class QuestionsController : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("bulk")]
+    public async Task<ActionResult<BulkImportResponse>> BulkImport([FromBody] List<QuestionDto> questions)
+    {
+        var adminCode = Request.Headers["X-Admin-Code"].ToString();
+        var expectedCode = _config["AdminCode"] ?? "admin1234";
+
+        if (adminCode != expectedCode)
+            return Unauthorized("Invalid admin code");
+
+        // Soft-delete all existing active questions
+        var existing = await _db.Questions.Where(q => q.IsActive).ToListAsync();
+        foreach (var q in existing)
+        {
+            q.IsActive = false;
+        }
+
+        // Add new questions
+        var newQuestions = questions.Select(dto => new Question
+        {
+            Category = dto.Category,
+            SubCategory = dto.SubCategory,
+            Text = dto.Text,
+            OptionA = dto.OptionA,
+            OptionB = dto.OptionB,
+            OptionC = dto.OptionC,
+            OptionD = dto.OptionD,
+            CorrectOption = dto.CorrectOption,
+            Explanation = dto.Explanation,
+            ImageUrl = dto.ImageUrl,
+            IsActive = true
+        }).ToList();
+
+        _db.Questions.AddRange(newQuestions);
+        await _db.SaveChangesAsync();
+
+        return Ok(new BulkImportResponse
+        {
+            DeletedCount = existing.Count,
+            ImportedCount = newQuestions.Count,
+            Message = "Bulk replacement completed successfully."
+        });
+    }
+
     // ---- helpers ----
     private async Task<List<Question>> GetRandomQuestions(string category, int count)
     {
@@ -135,3 +178,10 @@ public record QuestionDto(
     string Category, string SubCategory, string Text,
     string? ImageUrl, string OptionA, string OptionB,
     string OptionC, string OptionD, string CorrectOption, string Explanation);
+
+public class BulkImportResponse
+{
+    public int DeletedCount { get; set; }
+    public int ImportedCount { get; set; }
+    public string Message { get; set; } = "";
+}

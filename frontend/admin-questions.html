@@ -199,10 +199,6 @@
           <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Option C *</label>
           <input id="f-optC" type="text" class="mt-1 block w-full rounded-custom border-gray-300 text-sm focus:ring-primary"/>
         </div>
-        <div>
-          <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Option D *</label>
-          <input id="f-optD" type="text" class="mt-1 block w-full rounded-custom border-gray-300 text-sm focus:ring-primary"/>
-        </div>
       </div>
       <div>
         <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Correct Answer *</label>
@@ -210,7 +206,6 @@
           <option value="A">A</option>
           <option value="B">B</option>
           <option value="C">C</option>
-          <option value="D">D</option>
         </select>
       </div>
       <div>
@@ -288,7 +283,7 @@ function openModal(id) {
   if (!id) {
     document.getElementById('modal-title').textContent = 'Add New Question';
     document.getElementById('edit-id').value = '';
-    ['category','subcategory','text','imageurl','optA','optB','optC','optD','correct','explanation'].forEach(f => {
+    ['category','subcategory','text','imageurl','optA','optB','optC','correct','explanation'].forEach(f => {
       const el = document.getElementById('f-' + f);
       if (el) el.value = f === 'correct' ? 'A' : '';
     });
@@ -309,7 +304,6 @@ function openModal(id) {
   document.getElementById('f-optA').value = q.optionA;
   document.getElementById('f-optB').value = q.optionB;
   document.getElementById('f-optC').value = q.optionC;
-  document.getElementById('f-optD').value = q.optionD;
   document.getElementById('f-correct').value = q.correctOption || 'A';
   document.getElementById('f-explanation').value = q.explanation || '';
   // Show existing image in drop zone
@@ -400,13 +394,12 @@ async function saveQuestion() {
     optionA:     document.getElementById('f-optA').value.trim(),
     optionB:     document.getElementById('f-optB').value.trim(),
     optionC:     document.getElementById('f-optC').value.trim(),
-    optionD:     document.getElementById('f-optD').value.trim(),
-    correctOption: document.getElementById('f-correct').value,
+    optionD:     "", 
     explanation: document.getElementById('f-explanation').value.trim()
   };
 
   const errEl = document.getElementById('form-error');
-  if (!payload.text || !payload.optionA || !payload.optionB || !payload.optionC || !payload.optionD || !payload.explanation) {
+  if (!payload.text || !payload.optionA || !payload.optionB || !payload.optionC || !payload.explanation) {
     errEl.textContent = 'Please fill in all required fields.';
     errEl.classList.remove('hidden');
     return;
