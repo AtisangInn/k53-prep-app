@@ -77,13 +77,11 @@ const student = requireStudent();
 if (!student) throw new Error('Not authenticated');
 
 let allQuestions = [];
-let activeCategory = 'Rules';
-
 const categories = [
-  { key: 'Handbook', label: 'Complete K53 Book', icon: '📖' },
   { key: 'Rules',    label: 'Rules of the Road',  icon: '📋' },
   { key: 'Signs',    label: 'Road Signs',          icon: '🚦' },
   { key: 'Controls', label: 'Vehicle Controls',    icon: '🚗' },
+  { key: 'Handbook', label: 'Complete K53 Book', icon: '📖' },
 ];
 
 async function init() {
@@ -98,7 +96,7 @@ async function init() {
     if (catParam && categories.some(c => c.key === catParam)) {
       showCategory(catParam);
     } else {
-      showCategory('Handbook');
+      showCategory('Welcome');
     }
   } catch (e) {
     document.getElementById('loading').textContent = 'Failed to load: ' + e.message;
@@ -135,6 +133,11 @@ function showCategory(cat) {
   loading.classList.add('hidden');
   container.classList.remove('hidden');
 
+  if (cat === 'Welcome') {
+    renderWelcome();
+    return;
+  }
+
   if (cat === 'Handbook') {
     document.getElementById('progress-label').textContent = `Complete K53 Book`;
     container.innerHTML = `
@@ -145,7 +148,83 @@ function showCategory(cat) {
     return;
   }
 
+  currentCardIndex = 0; // Reset index when switching categories
   renderCards();
+}
+
+function renderWelcome() {
+  const container = document.getElementById('questions-container');
+  document.getElementById('progress-label').textContent = `Study Guide Welcome`;
+  
+  container.innerHTML = `
+    <div class="max-w-4xl mx-auto py-12 px-6">
+      <div class="text-center mb-16">
+        <div class="inline-block p-4 bg-primary/10 rounded-full mb-6">
+          <span class="text-4xl text-primary">🎓</span>
+        </div>
+        <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight mb-4">Welcome to Your Study Hub</h1>
+        <p class="text-lg text-slate-500 max-w-2xl mx-auto">Master your K53 Learner's License with our interactive tools designed for focused learning and effective retention.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+        <!-- Flashcards feature -->
+        <div class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+          <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center text-2xl mb-6">🎴</div>
+          <h2 class="text-xl font-bold text-slate-900 mb-3">Interactive Flashcards</h2>
+          <p class="text-slate-600 mb-4 text-sm leading-relaxed">
+            Our 156-question bank is broken down into Rules, Signs, and Controls. Use these cards to test your knowledge quickly. Tap to reveal the correct answer and a detailed explanation.
+          </p>
+          <ul class="space-y-2 mb-6">
+            <li class="flex items-center text-xs text-slate-500"><span class="text-amber-500 mr-2">✓</span> Active Recall: Test yourself before seeing the answer</li>
+            <li class="flex items-center text-xs text-slate-500"><span class="text-amber-500 mr-2">✓</span> One-at-a-time focus for better concentration</li>
+          </ul>
+          <button onclick="showCategory('Rules')" class="w-full py-2.5 bg-amber-50 text-amber-700 font-bold rounded-xl hover:bg-amber-100 transition-colors">Start Reviewing →</button>
+        </div>
+
+        <!-- PDF feature -->
+        <div class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+          <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6">📖</div>
+          <h2 class="text-xl font-bold text-slate-900 mb-3">Complete K53 Book</h2>
+          <p class="text-slate-600 mb-4 text-sm leading-relaxed">
+            Access the official K53 study material directly on this platform. We've optimized the book to skip straight to the content, starting from the table of contents on page 2.
+          </p>
+          <ul class="space-y-2 mb-6">
+            <li class="flex items-center text-xs text-slate-500"><span class="text-blue-500 mr-2">✓</span> Theoretical foundation for the practice tests</li>
+            <li class="flex items-center text-xs text-slate-500"><span class="text-blue-500 mr-2">✓</span> Searchable PDF content for quick lookups</li>
+          </ul>
+          <button onclick="showCategory('Handbook')" class="w-full py-2.5 bg-blue-50 text-blue-700 font-bold rounded-xl hover:bg-blue-100 transition-colors">View Handbook →</button>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 rounded-3xl p-10 text-white relative overflow-hidden">
+        <div class="relative z-10">
+          <h3 class="text-2xl font-bold mb-4">How to learn best on this platform</h3>
+          <p class="text-slate-400 mb-8 max-w-xl">Follow these three simple steps to ensure you're fully ready for your Learner's License test.</p>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div class="space-y-2">
+              <div class="text-2xl font-black text-primary/40">01</div>
+              <p class="text-sm font-bold">Read & Understand</p>
+              <p class="text-xs text-slate-500">Go through the K53 Book to build a strong theoretical base.</p>
+            </div>
+            <div class="space-y-2">
+              <div class="text-2xl font-black text-primary/40">02</div>
+              <p class="text-sm font-bold">Use Flashcards</p>
+              <p class="text-xs text-slate-500">Practice with memory cards twice a day until they become second nature.</p>
+            </div>
+            <div class="space-y-2">
+              <div class="text-2xl font-black text-primary/40">03</div>
+              <p class="text-sm font-bold">Take Practice Tests</p>
+              <p class="text-xs text-slate-500">Once you feel ready, take the timed Practice Test to simulate the exam.</p>
+            </div>
+          </div>
+        </div>
+        <div class="absolute top-0 right-0 p-8 text-primary opacity-10">
+           <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 let currentCardIndex = 0;
