@@ -18,10 +18,18 @@
   .cat-btn { cursor:pointer; transition:background .15s; }
   .cat-btn:hover { background:#f8faff; }
   .cat-btn.active { background:#eff4ff; color:#c1272d; font-weight:600; }
-  .answer-option { transition:border .15s,background .15s; }
-  .answer-option.selected { border-color:#c1272d; background:#eff4ff; }
-  .answer-option.correct  { border-color:#10b981; background:#f0fdf4; }
-  .answer-option.wrong    { border-color:#ef4444; background:#fef2f2; }
+  
+  /* Flashcard 3D Effects */
+  .flashcard { perspective: 1000px; height: 500px; cursor:pointer; }
+  .flashcard-inner { position: relative; width:100%; height:100%; transition: transform 0.6s; transform-style: preserve-3d; }
+  .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+  .flashcard-front, .flashcard-back { 
+    position: absolute; width:100%; height:100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; 
+    border-radius: 12px; background: white; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    padding: 2rem; display: flex; flex-direction: column; overflow-y: auto;
+  }
+  .flashcard-back { transform: rotateY(180deg); background: #f8faff; border-color: #c1272d; }
+  
   .scrollbar::-webkit-scrollbar { width:4px; }
   .scrollbar::-webkit-scrollbar-thumb { background:#d1d5db; border-radius:2px; }
 </style>
@@ -52,6 +60,14 @@
       <div>
         <h2 class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Categories</h2>
         <div id="category-nav" class="space-y-1"></div>
+      </div>
+      <div>
+        <h2 class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Options</h2>
+        <button onclick="shuffleQuestions()" 
+          class="w-full flex items-center gap-3 px-3 py-2 rounded-custom text-slate-700 text-sm hover:bg-slate-50 transition-colors">
+          <span>🔀</span>
+          <span>Shuffle Flashcards</span>
+        </button>
       </div>
     </nav>
   </aside>
@@ -137,66 +153,76 @@ function showCategory(cat) {
     return;
   }
 
-  const questions = allQuestions.filter(q => q.category === cat);
-  const answered = Object.keys(sessionStorage).filter(k => k.startsWith('ans-')).length;
-  const total = allQuestions.length;
-  document.getElementById('progress-label').textContent = `Studied: ${answered}/${total}`;
+  renderCards();
+}
+
+function renderCards() {
+  const container = document.getElementById('questions-container');
+  const questions = allQuestions.filter(q => q.category === activeCategory);
+  
+  if (isShuffled) {
+    questions.sort(() => Math.random() - 0.5);
+  }
+
+  document.getElementById('progress-label').textContent = `Studying: ${questions.length} Cards`;
 
   container.innerHTML = questions.map((q, i) => `
-    <div class="bg-white rounded-custom border border-gray-100 shadow-sm p-6 md:p-8">
-      <div class="flex items-center gap-3 mb-4">
-        <span class="text-xs font-semibold text-primary uppercase tracking-wider">${q.subCategory}</span>
-        <span class="text-xs text-gray-400">Q${i+1}</span>
-      </div>
-      ${q.imageUrl ? `<div class="mb-6 flex justify-center bg-gray-50 p-4 rounded-custom border border-dashed border-gray-200">
-        <img src="${q.imageUrl.startsWith('http') ? q.imageUrl : 'assets/' + q.imageUrl}" alt="Road sign" class="max-h-40 object-contain"/>
-      </div>` : ''}
-      <h2 class="text-lg font-semibold mb-6">${q.text}</h2>
-      <div class="space-y-3" id="opts-${q.id}">
-        ${['A','B','C'].map(opt => `
-          <label class="answer-option flex items-center p-4 border-2 border-gray-100 rounded-custom cursor-pointer group"
-            id="opt-${q.id}-${opt}" onclick="selectAnswer(${q.id}, '${opt}', this)">
-            <input type="radio" name="q-${q.id}" value="${opt}" class="w-5 h-5 text-primary border-gray-300 focus:ring-primary"/>
-            <span class="ml-4 text-gray-700 font-medium">${opt}. ${q['option'+opt]}</span>
-          </label>
-        `).join('')}
-      </div>
-      <div id="explanation-${q.id}" class="hidden mt-4 p-4 bg-blue-50 border border-blue-100 rounded-custom">
-        <p class="text-sm font-semibold text-primary mb-1">Explanation</p>
-        <p class="text-sm text-gray-700" id="explanation-text-${q.id}"></p>
+    <div class="flashcard group" onclick="this.classList.toggle('flipped')">
+      <div class="flashcard-inner">
+        <!-- Front -->
+        <div class="flashcard-front">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-xs font-semibold text-primary uppercase tracking-wider">${q.subCategory}</span>
+            <span class="text-xs text-gray-400">Card ${i+1}</span>
+          </div>
+          
+          ${q.imageUrl ? `<div class="mb-4 flex justify-center bg-gray-50 p-4 rounded-custom border border-dashed border-gray-200">
+            <img src="${q.imageUrl.startsWith('http') ? q.imageUrl : 'assets/' + q.imageUrl}" alt="Road sign" class="max-h-32 object-contain"/>
+          </div>` : ''}
+          
+          <h2 class="text-lg font-bold mb-4">${q.text}</h2>
+          
+          <div class="space-y-2 mt-auto">
+            ${['A','B','C'].map(opt => `
+              <div class="flex items-center p-3 border border-gray-100 rounded-lg bg-gray-50 text-sm">
+                <span class="font-bold text-primary mr-3">${opt}.</span>
+                <span class="text-gray-700">${q['option'+opt]}</span>
+              </div>
+            `).join('')}
+          </div>
+          
+          <p class="text-center text-[10px] text-gray-400 mt-4 uppercase font-bold tracking-widest">Tap to reveal answer</p>
+        </div>
+        
+        <!-- Back -->
+        <div class="flashcard-back">
+          <div class="text-center mb-6">
+            <div class="inline-block px-4 py-1.5 bg-green-100 text-green-700 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
+              Correct Answer
+            </div>
+            <h3 class="text-2xl font-black text-slate-900 mb-2">Option ${q.correctOption}</h3>
+            <p class="text-lg text-slate-700 font-medium border-t border-slate-200 pt-4 mt-2">
+              ${q['option'+q.correctOption]}
+            </p>
+          </div>
+          
+          <div class="mt-auto p-4 bg-white border border-slate-200 rounded-xl">
+            <p class="text-xs font-bold text-primary uppercase mb-2">Explanation</p>
+            <p class="text-sm text-slate-600 leading-relaxed">${q.explanation || 'No explanation provided.'}</p>
+          </div>
+          
+          <p class="text-center text-[10px] text-gray-400 mt-6 uppercase font-bold tracking-widest">Tap to see question</p>
+        </div>
       </div>
     </div>
   `).join('');
 }
 
-async function selectAnswer(questionId, chosen, labelEl) {
-  // Prevent re-answering
-  if (sessionStorage.getItem(`ans-${questionId}`)) return;
-  sessionStorage.setItem(`ans-${questionId}`, chosen);
+let isShuffled = false;
 
-  try {
-    const result = await apiFetch(`/questions/${questionId}/answer`);
-    const correct = result.correctOption;
-
-    // Colour feedback
-    ['A','B','C'].forEach(opt => {
-      const el = document.getElementById(`opt-${questionId}-${opt}`);
-      if (!el) return;
-      if (opt === correct) { el.classList.add('correct'); }
-      else if (opt === chosen && opt !== correct) { el.classList.add('wrong'); }
-    });
-
-    // Show explanation
-    const expEl = document.getElementById(`explanation-${questionId}`);
-    document.getElementById(`explanation-text-${questionId}`).textContent = result.explanation;
-    expEl?.classList.remove('hidden');
-
-    // Update progress
-    const answered = Object.keys(sessionStorage).filter(k => k.startsWith('ans-')).length;
-    document.getElementById('progress-label').textContent = `Studied: ${answered}/${allQuestions.length}`;
-  } catch (e) {
-    alert('Error fetching answer: ' + e.message);
-  }
+function shuffleQuestions() {
+  isShuffled = !isShuffled;
+  renderCards();
 }
 
 init();
