@@ -13,21 +13,52 @@
 </script>
 <style>
   body { 
-    background-image: url('assets/img/landing-bg.png'); 
-    background-size: 800px; 
-    background-position: center; 
-    background-attachment: fixed;
+    background: #fdfdfd; 
+    overflow-x: hidden;
     position: relative;
     min-height: 100vh;
   }
-  body::before {
-    content: "";
-    position: absolute;
+  
+  /* Animated Background Elements */
+  .bg-layer {
+    position: fixed;
     inset: 0;
-    background: rgba(255, 255, 255, 0.35);
-    backdrop-filter: blur(12px) saturate(140%);
     z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
   }
+  
+  .gliding-logo {
+    position: absolute;
+    top: 40%;
+    left: -50%;
+    width: 600px;
+    height: 600px;
+    background-image: url('assets/img/landing-bg.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.15;
+    filter: blur(2px);
+    animation: glide 60s linear infinite;
+  }
+  
+  .floating-sign {
+    position: absolute;
+    opacity: 0.4;
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+    animation: float 15s ease-in-out infinite;
+  }
+
+  @keyframes glide {
+    from { transform: translateX(-20%) rotate(0deg); }
+    to { transform: translateX(250%) rotate(5deg); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-40px) rotate(10deg); }
+  }
+
   .glass-effect {
     background: rgba(255, 255, 255, 0.55);
     backdrop-filter: blur(24px) saturate(180%);
@@ -52,6 +83,35 @@
 </style>
 </head>
 <body class="font-sans antialiased min-h-screen flex flex-col">
+
+<!-- Animated Background Layer -->
+<div class="bg-layer" id="bg-layer">
+  <div class="gliding-logo"></div>
+</div>
+
+<script>
+  // Generate random floating signs
+  const signs = [
+    'assets/img/speed_limit_80.png',
+    'assets/img/no_overtaking.png',
+    'assets/img/no_u_turn.png',
+    'assets/img/pdf_img_p1_1.png',
+    'assets/img/pdf_img_p2_1.png',
+    'assets/img/pdf_img_p3_1.png'
+  ];
+  const layer = document.getElementById('bg-layer');
+  for (let i = 0; i < 12; i++) {
+    const img = document.createElement('img');
+    img.src = signs[Math.floor(Math.random() * signs.length)];
+    img.className = 'floating-sign';
+    img.style.top = Math.random() * 100 + '%';
+    img.style.left = Math.random() * 100 + '%';
+    img.style.width = (Math.random() * 60 + 40) + 'px';
+    img.style.animationDelay = (Math.random() * -20) + 's';
+    img.style.animationDuration = (Math.random() * 10 + 10) + 's';
+    layer.appendChild(img);
+  }
+</script>
 
 <!-- Admin toggle nav -->
 <nav class="relative z-10 p-4 flex justify-end">
