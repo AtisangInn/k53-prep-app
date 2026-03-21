@@ -82,7 +82,7 @@
   </header>
 
   <!-- Stats row -->
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+  <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
     <div class="stat-card">
       <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Total Questions</p>
       <p id="stat-questions" class="text-3xl font-bold text-primary mt-1">—</p>
@@ -98,6 +98,10 @@
     <div class="stat-card">
       <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Pass Rate</p>
       <p id="stat-passrate" class="text-3xl font-bold text-green-600 mt-1">—</p>
+    </div>
+    <div class="stat-card">
+      <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Cards Flipped</p>
+      <p id="stat-flipped" class="text-3xl font-bold text-blue-600 mt-1">—</p>
     </div>
   </div>
 
@@ -142,6 +146,9 @@ async function init() {
     const passCount = results.filter(r => r.overallPass).length;
     const passRate = results.length > 0 ? Math.round((passCount / results.length) * 100) : 0;
     document.getElementById('stat-passrate').textContent = passRate + '%';
+
+    const totalFlipped = students.reduce((acc, s) => acc + (s.flippedCardsCount || 0), 0);
+    document.getElementById('stat-flipped').textContent = totalFlipped;
 
     const tbody = document.getElementById('results-table');
     if (results.length === 0) {
