@@ -28,35 +28,11 @@
     pointer-events: none;
   }
   
-  .gliding-logo {
-    position: absolute;
-    top: 40%;
-    left: -50%;
-    width: 600px;
-    height: 600px;
-    background-image: url('assets/img/landing-bg.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    opacity: 0.15;
-    filter: blur(2px);
-    animation: glide 60s linear infinite, spin 20s linear infinite;
-  }
-  
   .floating-sign {
     position: absolute;
     opacity: 0.35;
     filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
     animation: float 15s ease-in-out infinite;
-  }
-
-  @keyframes glide {
-    from { transform: translateX(-20%); }
-    to { transform: translateX(250%); }
-  }
-
-  @keyframes spin {
-    from { rotate: 0deg; }
-    to { rotate: 360deg; }
   }
 
   @keyframes float {
@@ -91,7 +67,6 @@
 
 <!-- Animated Background Layer -->
 <div class="bg-layer" id="bg-layer">
-  <div class="gliding-logo"></div>
 </div>
 
 <script>
