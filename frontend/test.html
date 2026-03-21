@@ -180,7 +180,7 @@ function renderQuestion(index) {
 
   const imgWrap = document.getElementById('q-image-wrap');
   if (q.imageUrl) {
-    document.getElementById('q-image').src = 'assets/' + q.imageUrl;
+    document.getElementById('q-image').src = q.imageUrl.startsWith('http') ? q.imageUrl : 'assets/' + q.imageUrl;
     imgWrap.classList.remove('hidden');
   } else {
     imgWrap.classList.add('hidden');
