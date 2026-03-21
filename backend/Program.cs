@@ -74,11 +74,13 @@ try
     // --- Middleware ---
     var isProd = app.Environment.IsProduction();
     app.UseCors(isProd && !string.IsNullOrEmpty(frontendUrl) ? "ProductionPolicy" : "DevPolicy");
+    
+    // Enable serving index.html as a default file
+    app.UseDefaultFiles();
     app.UseStaticFiles();
+    
     app.MapControllers();
 
-    // Healthy check
-    app.MapGet("/", () => "K53 Prep API is running!");
 
     // --- Auto-migrate and seed on startup ---
     using (var scope = app.Services.CreateScope())
