@@ -101,13 +101,36 @@ const categories = [
 async function init() {
   try {
     allQuestions = await apiFetch('/questions');
+    
+    // Check for target question deep link
+    const urlParams = new URLSearchParams(window.location.search);
+    const qIdParam = urlParams.get('questionId');
+    const catParam = urlParams.get('category');
+    
+    if (qIdParam) {
+      const qId = parseInt(qIdParam);
+      const targetQ = allQuestions.find(q => q.id === qId);
+      if (targetQ) {
+        const cat = targetQ.category;
+        const catQuestions = allQuestions.filter(q => q.category === cat);
+        const idx = catQuestions.findIndex(q => q.id === qId);
+        if (idx !== -1) {
+          cardIndices[cat] = idx;
+        }
+      }
+    }
+
     renderNav();
     renderAllSections();
     
-    // Smooth scroll based on URL param
-    const urlParams = new URLSearchParams(window.location.search);
-    const catParam = urlParams.get('category');
-    if (catParam) {
+    // Smooth scroll to target
+    if (qIdParam) {
+      const qId = parseInt(qIdParam);
+      const targetQ = allQuestions.find(q => q.id === qId);
+      if (targetQ) {
+        setTimeout(() => scrollToSection(targetQ.category), 500);
+      }
+    } else if (catParam) {
       setTimeout(() => scrollToSection(catParam), 500);
     }
     
