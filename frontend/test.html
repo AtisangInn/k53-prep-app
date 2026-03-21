@@ -51,7 +51,7 @@
 
   <!-- Question area -->
   <section class="lg:col-span-2 space-y-6">
-    <div class="bg-white p-6 md:p-8 rounded-custom shadow-sm border border-gray-100 min-h-[600px] flex flex-col">
+    <div class="bg-white p-6 md:p-8 rounded-custom shadow-sm border border-gray-100 h-[600px] flex flex-col relative">
       <div class="flex items-center justify-between mb-6">
         <span id="q-counter" class="text-sm font-semibold text-primary uppercase tracking-wider">Question 1 of 64</span>
         <span id="q-category" class="text-xs text-gray-400">Rules of the Road</span>
@@ -66,7 +66,7 @@
     <!-- Nav buttons -->
     <div class="flex items-center justify-between pt-2">
       <button onclick="navigate(-1)"
-        class="px-6 py-3 bg-white border border-gray-200 rounded-custom font-semibold text-gray-600 hover:bg-gray-50 flex items-center gap-2">
+        class="min-w-[140px] px-6 py-3 bg-white border border-gray-200 rounded-custom font-semibold text-gray-600 hover:bg-gray-50 flex items-center justify-center gap-2">
         ← Previous
       </button>
       <div class="flex gap-4">
@@ -75,7 +75,7 @@
           Skip
         </button>
         <button id="next-btn" onclick="navigate(1)"
-          class="px-10 py-3 bg-primary text-white rounded-custom font-semibold hover:opacity-90 shadow-md flex items-center gap-2">
+          class="min-w-[180px] px-10 py-3 bg-primary text-white rounded-custom font-semibold hover:opacity-90 shadow-md flex items-center justify-center gap-2">
           Next →
         </button>
       </div>
