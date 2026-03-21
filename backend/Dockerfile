@@ -15,4 +15,6 @@ RUN dotnet publish "K53PrepApp.Api.csproj" -c Release -o /app/publish /p:UseAppH
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
+# Copy frontend files to wwwroot so UseStaticFiles() serves them
+COPY --from=build /src/frontend ./wwwroot 
 ENTRYPOINT ["dotnet", "K53PrepApp.Api.dll"]
