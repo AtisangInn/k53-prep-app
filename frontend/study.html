@@ -91,10 +91,10 @@ let allQuestions = [];
 const cardIndices = { Rules: 0, Signs: 0, Controls: 0, Mix: 0 };
 const categories = [
   { key: 'Welcome',  label: 'Study Hub Home',    icon: '🏠' },
+  { key: 'Mix',      label: 'Study Mix',           icon: '🔀' },
   { key: 'Rules',    label: 'Rules of the Road',  icon: '📋' },
   { key: 'Signs',    label: 'Road Signs',          icon: '🚦' },
   { key: 'Controls', label: 'Vehicle Controls',    icon: '🚗' },
-  { key: 'Mix',      label: 'Randomized All',      icon: '🔀' },
   { key: 'Handbook', label: 'Complete K53 Book', icon: '📖' },
 ];
 
@@ -209,14 +209,14 @@ function renderAllSections() {
   `;
 
   // 2. Flashcard Sections
-  const flashcardCats = ['Rules', 'Signs', 'Controls', 'Mix'];
+  const flashcardCats = ['Mix', 'Rules', 'Signs', 'Controls'];
   flashcardCats.forEach(cat => {
     html += `
       <section id="section-${cat}" class="scroll-mt-24 border-t border-slate-100 pt-16">
         <div class="max-w-3xl mx-auto px-2">
           <div class="mb-10 text-center">
-            <h2 class="text-3xl font-black text-slate-900 mb-2">${cat === 'Mix' ? 'Randomized Study Mix' : cat === 'Rules' ? 'Rules of the Road' : cat === 'Signs' ? 'Road Signs' : 'Vehicle Controls'}</h2>
-            <p class="text-slate-400 text-sm">${cat === 'Mix' ? 'All 156 questions shuffled.' : 'Tap and flip to master the ' + cat + ' section.'}</p>
+            <h2 class="text-3xl font-black text-slate-900 mb-2">${cat === 'Mix' ? 'Ultimate Study Mix' : cat === 'Rules' ? 'Rules of the Road' : cat === 'Signs' ? 'Road Signs' : 'Vehicle Controls'}</h2>
+            <p class="text-slate-400 text-sm">${cat === 'Mix' ? 'All questions shuffled for a complete review.' : 'Tap and flip to master the ' + cat + ' section.'}</p>
           </div>
           <div id="container-${cat}"></div>
         </div>
@@ -340,7 +340,7 @@ const observer = new IntersectionObserver((entries) => {
 
 let studyStartTime = Date.now();
 async function trackActivity(type, amount = 1) {
-    const studentId = sessionStorage.getItem('studentId');
+    const studentId = student?.id;
     if (!studentId) return;
 
     const body = type === 'flip' 
