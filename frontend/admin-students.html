@@ -23,7 +23,7 @@
 <body class="flex min-h-screen">
 
 <!-- Sidebar -->
-<aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full z-10">
+<aside id="sidebar" class="hidden lg:flex w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full z-20">
   <div class="p-6 border-b border-gray-100 flex items-center gap-3">
     <div class="w-10 h-10 bg-primary flex items-center justify-center rounded-custom text-white">
       <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -53,10 +53,15 @@
 </aside>
 
 <!-- Main -->
-<main class="flex-1 ml-64">
+<main class="flex-1 lg:ml-64">
 
   <!-- Top bar -->
-  <header class="h-16 border-b border-gray-200 bg-white flex items-center justify-between px-8 sticky top-0 z-10">
+  <header class="h-16 border-b border-gray-200 bg-white flex items-center justify-between px-4 md:px-8 sticky top-0 z-10">
+    <div class="lg:hidden">
+      <button onclick="toggleSidebar(true)" aria-label="Open sidebar" class="px-3 py-2 bg-white border border-gray-200 rounded-custom mr-3">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
     <div class="flex items-center gap-4 flex-1">
       <div class="max-w-md w-full relative">
         <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -266,6 +271,27 @@ function closeDrawer() {
 function logout() { sessionStorage.removeItem('adminCode'); window.location.href = 'index.html'; }
 
 init();
+</script>
+<script>
+function toggleSidebar(open) {
+  const sidebar = document.getElementById('sidebar');
+  if (!sidebar) return;
+  if (open) {
+    sidebar.classList.remove('hidden');
+    let overlay = document.getElementById('sidebar-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'sidebar-overlay';
+      overlay.className = 'fixed inset-0 bg-black/30 z-10';
+      overlay.onclick = () => toggleSidebar(false);
+      document.body.appendChild(overlay);
+    }
+  } else {
+    sidebar.classList.add('hidden');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (overlay) overlay.remove();
+  }
+}
 </script>
 </body>
 </html>
