@@ -115,6 +115,20 @@ public class StudentsController : ControllerBase
         await _db.SaveChangesAsync();
         return Ok(new { student.FlippedCardsCount, student.TotalStudySeconds });
     }
+
+    // DELETE /api/students/{id} - admin: delete student
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id, [FromHeader(Name = "X-Admin-Code")] string? adminCode)
+    {
+        if (adminCode != AdminCode) return Unauthorized();
+
+        var student = await _db.Students.FindAsync(id);
+        if (student == null) return NotFound();
+
+        _db.Students.Remove(student);
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
 }
 
 // ============================================================

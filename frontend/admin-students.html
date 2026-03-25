@@ -107,6 +107,8 @@
           <tr class="text-left text-xs uppercase tracking-wider text-gray-500">
             <th class="px-6 py-3">Student</th>
             <th class="px-6 py-3">Phone</th>
+            <th class="px-6 py-3">First Seen</th>
+            <th class="px-6 py-3">Last Seen</th>
             <th class="px-6 py-3">Flipped</th>
             <th class="px-6 py-3">Study Time</th>
             <th class="px-6 py-3">Tests</th>
@@ -188,6 +190,9 @@ function renderTable(students) {
       ? '<span class="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold">FAIL</span>'
       : '<span class="px-2 py-1 bg-gray-100 text-gray-500 rounded-full text-xs">No tests</span>';
 
+    const firstSeen = new Date(s.firstSeen).toLocaleDateString('en-ZA', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    const lastSeenFormatted = new Date(s.lastSeen).toLocaleDateString('en-ZA', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+
     return `
     <tr class="hover:bg-gray-50 transition-colors">
       <td class="px-6 py-4">
@@ -197,16 +202,24 @@ function renderTable(students) {
         </div>
       </td>
       <td class="px-6 py-4 text-gray-400 text-xs">${s.phone}</td>
+      <td class="px-6 py-4 text-gray-500 text-xs whitespace-nowrap">${firstSeen}</td>
+      <td class="px-6 py-4 text-gray-500 text-xs whitespace-nowrap">${lastSeenFormatted}</td>
       <td class="px-6 py-4 font-bold text-slate-700">${s.flippedCardsCount || 0}</td>
       <td class="px-6 py-4 text-gray-500">${studyTimeStr}</td>
       <td class="px-6 py-4 font-semibold">${s.testCount}</td>
       <td class="px-6 py-4">${s.lastScore != null ? s.lastScore + '/64' : '—'}</td>
       <td class="px-6 py-4">${passLabel}</td>
       <td class="px-6 py-4">
-        <button onclick="viewHistory(${s.id}, '${s.name}')"
-          class="text-xs px-3 py-1 rounded border border-gray-200 hover:bg-gray-50 text-gray-600 font-medium">
-          History
-        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="viewHistory(${s.id}, '${s.name.replace(/'/g, "\\'")}')"
+            class="text-xs px-3 py-1 rounded border border-gray-200 hover:bg-gray-50 text-gray-600 font-medium">
+            History
+          </button>
+          <button onclick="deleteStudent(${s.id}, '${s.name.replace(/'/g, "\\'")}')"
+            class="text-xs px-3 py-1 rounded border border-red-200 hover:bg-red-50 text-red-600 font-medium">
+            Delete
+          </button>
+        </div>
       </td>
     </tr>`;
   }).join('');
@@ -266,6 +279,19 @@ async function viewHistory(id, name) {
 function closeDrawer() {
   document.getElementById('history-drawer').classList.add('hidden');
   document.getElementById('drawer-overlay').classList.add('hidden');
+}
+
+async function deleteStudent(id, name) {
+  if (!confirm(`Are you sure you want to delete ${name} and all their test history? This action cannot be undone.`)) return;
+
+  try {
+    await apiFetch(`/students/${id}`, { method: 'DELETE' });
+    allStudents = allStudents.filter(s => s.id !== id);
+    filterStudents();
+    renderStats();
+  } catch(e) {
+    alert('Failed to delete student: ' + e.message);
+  }
 }
 
 function logout() { sessionStorage.removeItem('adminCode'); window.location.href = 'index.html'; }
