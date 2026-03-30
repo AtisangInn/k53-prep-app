@@ -6,6 +6,7 @@
 <title>Godu Godu K53 Test Results</title>
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com/3.4.1?plugins=forms"></script>
+<link rel="stylesheet" href="assets/css/dark.css"/>
 <script>
   tailwind.config = {
     theme: { extend: {
@@ -29,10 +30,13 @@
   <!-- Header -->
   <header class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
     <div>
-      <h1 class="text-3xl font-bold tracking-tight text-slate-900">Godu Godu K53 Test Results</h1>
+      <h1 class="text-3xl font-bold tracking-tight text-slate-900"><span class="school-name"></span> K53 Test Results</h1>
       <p class="text-slate-500">Comprehensive breakdown of your practice session.</p>
     </div>
-    <div class="flex gap-3">
+    <div class="flex gap-3 items-center">
+      <button onclick="toggleTheme()" class="theme-toggle-btn" title="Toggle dark mode">
+        <span class="theme-toggle-icon"></span>
+      </button>
       <span id="result-date" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-eight shadow-sm text-sm font-semibold text-slate-700"></span>
       <span id="overall-badge" class="flex items-center gap-2 px-4 py-2 rounded-eight text-sm font-bold"></span>
     </div>
@@ -88,6 +92,8 @@
 
 </main>
 
+<script src="assets/js/theme.js"></script>
+<script src="assets/js/config.js"></script>
 <script src="assets/js/api.js"></script>
 <script>
 requireStudent();
@@ -185,7 +191,7 @@ function render() {
               </div>
             </div>
           </div>
-          <a href="study.html?questionId=${a.questionId}&category=${a.category}"
+          <a href="study.html?questionId=${a.questionId}&category=${a.category}&from=results"
             class="shrink-0 inline-flex items-center px-3 py-1.5 bg-primary/10 text-primary font-semibold text-xs rounded-eight hover:bg-primary hover:text-white transition-colors">
             Study this →
           </a>

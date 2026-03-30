@@ -1,0 +1,218 @@
+/*
+ * dark.css — Global dark mode overrides for all inner pages.
+ * Applied when <html class="dark"> is set by theme.js.
+ * Uses !important to safely override Tailwind utility classes.
+ */
+
+/* ── Base ─────────────────────────────────────────── */
+html.dark body {
+  background-color: #0d0f14 !important;
+  color: #d1d5db !important;
+}
+
+/* ── Background shades ───────────────────────────── */
+html.dark .bg-white       { background-color: #161b25 !important; }
+html.dark .bg-gray-50,
+html.dark .bg-slate-50    { background-color: #0f1318 !important; }
+html.dark .bg-gray-100    { background-color: #1a1f2b !important; }
+html.dark .bg-blue-50     { background-color: rgba(59,130,246,0.08) !important; }
+html.dark .bg-red-50      { background-color: rgba(193,39,45,0.12) !important; }
+html.dark .bg-red-100     { background-color: rgba(193,39,45,0.18) !important; }
+html.dark .bg-amber-100   { background-color: rgba(245,158,11,0.15) !important; }
+html.dark .bg-green-50    { background-color: rgba(16,185,129,0.08) !important; }
+html.dark .bg-slate-100   { background-color: #1e2430 !important; }
+
+/* ── Text ────────────────────────────────────────── */
+html.dark .text-gray-900,
+html.dark .text-slate-900,
+html.dark .text-slate-800 { color: #e2e8f0 !important; }
+
+html.dark .text-gray-700,
+html.dark .text-slate-700,
+html.dark .text-gray-800  { color: #cbd5e1 !important; }
+
+html.dark .text-gray-600,
+html.dark .text-slate-600 { color: #94a3b8 !important; }
+
+html.dark .text-gray-500,
+html.dark .text-slate-500,
+html.dark .text-slate-400 { color: #64748b !important; }
+
+html.dark .text-gray-400  { color: #475569 !important; }
+
+/* ── Borders ─────────────────────────────────────── */
+html.dark .border-gray-200,
+html.dark .border-gray-100,
+html.dark .border-slate-200,
+html.dark .border-slate-100,
+html.dark .border-gray-300 { border-color: rgba(255,255,255,0.08) !important; }
+
+html.dark .divide-gray-50 > * + *,
+html.dark .divide-gray-100 > * + * { border-color: rgba(255,255,255,0.06) !important; }
+
+/* ── Shadow override ─────────────────────────────── */
+html.dark .shadow-sm,
+html.dark .shadow-xl       { box-shadow: 0 4px 24px rgba(0,0,0,0.5) !important; }
+
+/* ── Sidebar ─────────────────────────────────────── */
+html.dark aside#sidebar {
+  background-color: #111318 !important;
+  border-right-color: rgba(255,255,255,0.07) !important;
+}
+html.dark .border-b { border-bottom-color: rgba(255,255,255,0.07) !important; }
+html.dark .border-t { border-top-color:    rgba(255,255,255,0.07) !important; }
+html.dark .border-r { border-right-color:  rgba(255,255,255,0.07) !important; }
+
+/* ── Header ─────────────────────────────────────── */
+html.dark header.sticky.bg-white,
+html.dark header.h-16.bg-white,
+html.dark header.h-16 {
+  background-color: #0d1117 !important;
+  border-bottom-color: rgba(255,255,255,0.07) !important;
+}
+
+/* ── Nav links ───────────────────────────────────── */
+html.dark .nav-link:hover      { background-color: rgba(255,255,255,0.05) !important; }
+html.dark .nav-link.active     { background-color: rgba(193,39,45,0.18) !important; }
+html.dark .nav-link            { color: #94a3b8 !important; }
+html.dark .nav-link.active     { color: #f87171 !important; }
+html.dark .nav-link:hover      { color: #e2e8f0 !important; }
+
+/* ── Stat cards ─────────────────────────────────── */
+html.dark .stat-card {
+  background-color: #161b25 !important;
+  border-color: rgba(255,255,255,0.07) !important;
+}
+
+/* ── Action / feature cards ──────────────────────── */
+html.dark .action-card {
+  background: rgba(22,27,37,0.9) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+html.dark .action-card:hover { border-color: rgba(193,39,45,0.5) !important; }
+
+/* ── Study Flashcards ───────────────────────────── */
+html.dark .flashcard-front {
+  background: #161b25 !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.4) !important;
+}
+html.dark .flashcard-back {
+  background: #0f1822 !important;
+  border-color: rgba(193,39,45,0.4) !important;
+}
+html.dark .bg-slate-50\/50 { background-color: rgba(15,19,24,0.6) !important; }
+
+/* ── Inputs ─────────────────────────────────────── */
+html.dark input:not([type="radio"]):not([type="checkbox"]),
+html.dark textarea,
+html.dark select {
+  background-color: rgba(255,255,255,0.06) !important;
+  border-color: rgba(255,255,255,0.12) !important;
+  color: #e2e8f0 !important;
+}
+html.dark input::placeholder { color: rgba(255,255,255,0.25) !important; }
+html.dark input:focus,
+html.dark textarea:focus,
+html.dark select:focus {
+  background-color: rgba(255,255,255,0.09) !important;
+  border-color: rgba(193,39,45,0.6) !important;
+  box-shadow: 0 0 0 3px rgba(193,39,45,0.12) !important;
+}
+
+/* ── Answer options (test.html) ──────────────────── */
+html.dark .answer-opt {
+  border-color: rgba(255,255,255,0.1) !important;
+  color: #d1d5db !important;
+  background-color: #161b25;
+}
+html.dark .answer-opt.selected {
+  border-color: #c1272d !important;
+  background-color: rgba(193,39,45,0.1) !important;
+}
+html.dark .answer-opt:hover { background-color: rgba(255,255,255,0.04) !important; }
+
+/* ── Timer (test.html) ───────────────────────────── */
+html.dark #test-timer { background-color: rgba(193,39,45,0.12) !important; border-color: rgba(193,39,45,0.2) !important; }
+
+/* ── Results page ────────────────────────────────── */
+html.dark .circular-fill { stroke: #f87171 !important; }
+html.dark .border-l-4.border-pass { border-left-color: #10b981 !important; }
+html.dark .border-l-4.border-fail { border-left-color: #ef4444 !important; }
+
+/* ── Table ───────────────────────────────────────── */
+html.dark thead { background-color: #0f1318 !important; }
+html.dark tbody tr:hover { background-color: rgba(255,255,255,0.03) !important; }
+
+/* ── Modal (admin-questions.html) ───────────────── */
+html.dark #modal-overlay > div {
+  background-color: #161b25 !important;
+}
+html.dark #modal-overlay .border-b { border-bottom-color: rgba(255,255,255,0.07) !important; }
+html.dark #modal-overlay .border-t { border-top-color: rgba(255,255,255,0.07) !important; }
+
+/* ── Toggle button ───────────────────────────────── */
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #6b7280;
+  background: transparent;
+}
+.theme-toggle-btn:hover {
+  background: #f1f5f9;
+  color: #374151;
+}
+html.dark .theme-toggle-btn {
+  color: #94a3b8;
+  border-color: rgba(255,255,255,0.1);
+}
+html.dark .theme-toggle-btn:hover {
+  background: rgba(255,255,255,0.08) !important;
+  color: #e2e8f0 !important;
+}
+
+/* ── Category badge pills (admin-questions.html) ─── */
+html.dark .bg-blue-100.text-blue-700   { background: rgba(59,130,246,0.15) !important; color: #93c5fd !important; }
+html.dark .bg-amber-100.text-amber-700 { background: rgba(245,158,11,0.15) !important; color: #fcd34d !important; }
+html.dark .bg-green-100.text-green-700 { background: rgba(16,185,129,0.15) !important; color: #6ee7b7 !important; }
+html.dark .bg-red-100.text-red-700     { background: rgba(239,68,68,0.15)   !important; color: #fca5a5 !important; }
+html.dark .bg-red-100.text-red-500     { background: rgba(239,68,68,0.12)   !important; color: #fca5a5 !important; }
+
+/* ── Study sidebar cat-btn ────────────────────────── */
+html.dark .cat-btn { color: #94a3b8 !important; }
+html.dark .cat-btn:hover { background: rgba(255,255,255,0.04) !important; }
+html.dark .cat-btn.active {
+  background: rgba(193,39,45,0.15) !important;
+  border-left-color: #c1272d !important;
+  color: #f87171 !important;
+}
+
+/* ── Progress bar bg container ───────────────────── */
+html.dark .bg-slate-100 { background-color: rgba(255,255,255,0.07) !important; }
+html.dark .h-1\.5.w-full.bg-slate-100 { background: rgba(255,255,255,0.07) !important; }
+
+/* ── Drop zone (admin-questions.html) ────────────── */
+html.dark #drop-zone {
+  background: rgba(255,255,255,0.04) !important;
+  border-color: rgba(255,255,255,0.1) !important;
+}
+html.dark #drop-zone.dragover {
+  border-color: #c1272d !important;
+  background: rgba(193,39,45,0.08) !important;
+}
+
+/* ── History drawer (admin-students.html) ─────────── */
+html.dark #history-drawer {
+  background-color: #111318 !important;
+}
+html.dark #history-drawer .border-b {
+  border-color: rgba(255,255,255,0.07) !important;
+}

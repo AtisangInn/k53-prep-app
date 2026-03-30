@@ -6,6 +6,7 @@
 <title>K53 Study Guide</title>
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com/3.4.1?plugins=forms"></script>
+<link rel="stylesheet" href="assets/css/dark.css"/>
 <script>
   tailwind.config = {
     theme: { extend: { colors: { primary: '#c1272d' }, fontFamily: { sans: ['Lexend','sans-serif'] }, borderRadius: { custom: '8px' } } }
@@ -48,7 +49,7 @@
               d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
           </svg>
         </div>
-        <h1 class="text-xl font-bold tracking-tight text-slate-800">Godu Godu Study Hub</h1>
+        <h1 class="text-xl font-bold tracking-tight text-slate-800"><span class="school-name">K53</span> Study Hub</h1>
       </div>
     </div>
     
@@ -68,9 +69,13 @@
         <span id="active-cat-label" class="text-xs font-bold text-primary uppercase tracking-widest">Study Hub Home</span>
       </div>
       <div class="flex items-center gap-4">
-        <a href="index.html" class="text-sm font-medium text-gray-500 hover:text-primary transition-colors flex items-center gap-1">
+        <a id="back-btn" href="index.html" class="text-sm font-medium text-gray-500 hover:text-primary transition-colors flex items-center gap-1">
           ← Back
         </a>
+        <button onclick="toggleTheme()" class="theme-toggle-btn" title="Toggle dark mode">
+          <span class="theme-toggle-icon"></span>
+          <span class="theme-toggle-label"></span>
+        </button>
       </div>
     </header>
 
@@ -82,6 +87,8 @@
   </main>
 </div>
 
+<script src="assets/js/theme.js"></script>
+<script src="assets/js/config.js"></script>
 <script src="assets/js/api.js"></script>
 <script>
 const student = requireStudent();
@@ -106,6 +113,15 @@ async function init() {
     const urlParams = new URLSearchParams(window.location.search);
     const qIdParam = urlParams.get('questionId');
     const catParam = urlParams.get('category');
+    const fromParam = urlParams.get('from');
+    
+    if (fromParam === 'results') {
+      const backBtn = document.getElementById('back-btn');
+      if (backBtn) {
+        backBtn.href = 'results.html';
+        backBtn.textContent = '← Back to Results';
+      }
+    }
     
     if (qIdParam) {
       const qId = parseInt(qIdParam);
@@ -234,13 +250,17 @@ function renderAllSections() {
           <p class="text-slate-400 text-sm leading-relaxed max-w-lg mx-auto">Official study material optimized for this platform. Ready to read starting from the Table of Contents.</p>
         </div>
         <div class="bg-white rounded-2xl border border-gray-100 shadow-xl h-[80vh] overflow-hidden">
-          <iframe src="assets/docs/godu-godu-driving-school-k53.pdf" class="w-full h-full border-0"></iframe>
+          <iframe id="handbook-viewer" src="" class="w-full h-full border-0"></iframe>
         </div>
       </div>
     </section>
   `;
 
   wrapper.innerHTML = html;
+  
+  // Set Handbook PDF src
+  const viewer = document.getElementById('handbook-viewer');
+  if (viewer) viewer.src = APP_CONFIG.handbookPath;
   
   // Initial card render for all
   flashcardCats.forEach(cat => renderSectionCard(cat));

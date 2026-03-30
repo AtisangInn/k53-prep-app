@@ -6,6 +6,7 @@
 <title>K53 Admin – Student Activity</title>
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com/3.4.1?plugins=forms"></script>
+<link rel="stylesheet" href="assets/css/dark.css"/>
 <script>
   tailwind.config = {
     theme: { extend: { colors:{ primary:'#c1272d' }, fontFamily:{ sans:['Lexend','sans-serif'] }, borderRadius:{ custom:'8px' } } }
@@ -31,7 +32,7 @@
           d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
       </svg>
     </div>
-    <h1 class="font-bold text-xl tracking-tight">K53 Admin</h1>
+    <h1 class="font-bold text-xl tracking-tight"><span class="school-name">Admin</span></h1>
   </div>
   <nav class="flex-1 p-4 space-y-1">
     <a href="admin-dashboard.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-custom text-sm text-gray-600">
@@ -72,7 +73,12 @@
           oninput="filterStudents()"/>
       </div>
     </div>
-    <div class="text-sm text-gray-500" id="student-count"></div>
+    <div class="flex items-center gap-3">
+      <button onclick="toggleTheme()" class="theme-toggle-btn" title="Toggle dark mode">
+        <span class="theme-toggle-icon"></span>
+      </button>
+      <div class="text-sm text-gray-500" id="student-count"></div>
+    </div>
   </header>
 
   <div class="p-8">
@@ -134,6 +140,8 @@
   <div id="drawer-content" class="p-6 space-y-4"></div>
 </div>
 
+<script src="assets/js/theme.js"></script>
+<script src="assets/js/config.js"></script>
 <script src="assets/js/api.js"></script>
 <script>
 requireAdmin();
