@@ -96,9 +96,10 @@ try
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             
             // --- Emergency Reset Logic ---
-            if (Environment.GetEnvironmentVariable("RESET_DB") == "true")
+            var resetDb = Environment.GetEnvironmentVariable("RESET_DB")?.ToLower();
+            if (resetDb == "true")
             {
-                Console.WriteLine("!!! NUCLEAR RESET: Wiping schema for PostgreSQL stability...");
+                Console.WriteLine("!!! NUCLEAR RESET: Wiping schema for PostgreSQL stability (Case-Insensitive Switch Active)...");
                 try 
                 {
                     // This is the definitive way to wipe a Postgres DB when tables are stuck
