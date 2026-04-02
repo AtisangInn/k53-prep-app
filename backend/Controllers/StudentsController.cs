@@ -32,40 +32,38 @@ public class StudentsController : ControllerBase
         if (string.IsNullOrWhiteSpace(dto.Name) || string.IsNullOrWhiteSpace(dto.Phone))
             return BadRequest("Name and phone are required.");
 
+        var name = dto.Name.Trim();
+        var phone = dto.Phone.Trim();
         var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
         var deviceId = !string.IsNullOrWhiteSpace(dto.DeviceId) ? dto.DeviceId : Guid.NewGuid().ToString();
 
-        // 1. Try exact match
+        // 1. Primary check: Name + Phone (our unique DB constraint)
         var student = await _db.Students
-            .FirstOrDefaultAsync(s => s.DeviceId == deviceId && s.Name == dto.Name.Trim() && s.Phone == dto.Phone.Trim());
+            .FirstOrDefaultAsync(s => s.Name == name && s.Phone == phone);
 
-        // 2. If no exact match but DeviceId is provided, force them to their original account for this device
+        // 2. Secondary check: DeviceId (if we still don't have a student)
         if (student == null && !string.IsNullOrWhiteSpace(dto.DeviceId))
         {
-            var existingDeviceStudent = await _db.Students.FirstOrDefaultAsync(s => s.DeviceId == dto.DeviceId);
-            if (existingDeviceStudent != null)
-            {
-                student = existingDeviceStudent;
-            }
+            student = await _db.Students.FirstOrDefaultAsync(s => s.DeviceId == dto.DeviceId);
         }
 
-        // 3. Fallback tracking logic (IP Limit: max 1 per 24 hours to stop device wipe bypass)
+        // 3. Create or Update
         if (student == null)
         {
+            // Abusive creation check (IP limit)
             var yesterday = DateTime.UtcNow.AddHours(-24);
             var ipAccountsCount = await _db.Students.CountAsync(s => s.IpAddress == ip && s.FirstSeen >= yesterday);
-            if (ipAccountsCount >= 1)
+            if (ipAccountsCount >= 3) // Relaxed from 1 to 3 for families/shared IPs
             {
-                // Find most recent account for this IP and force login
                 var recentStudent = await _db.Students.Where(s => s.IpAddress == ip).OrderByDescending(s => s.FirstSeen).FirstOrDefaultAsync();
                 if (recentStudent != null) student = recentStudent;
-                else return BadRequest("Max profile creation limit reached for this IP limit.");
+                else return BadRequest("Max profile creation limit reached for this connection.");
             }
             else
             {
                 student = new Student { 
-                    Name = dto.Name.Trim(), 
-                    Phone = dto.Phone.Trim(),
+                    Name = name, 
+                    Phone = phone,
                     DeviceId = deviceId,
                     IpAddress = ip
                 };
@@ -74,11 +72,13 @@ public class StudentsController : ControllerBase
         }
         else
         {
+            // Existing student found - update their reachability info
             student.LastSeen = DateTime.UtcNow;
-            if (string.IsNullOrEmpty(student.DeviceId)) student.DeviceId = deviceId;
-            if (string.IsNullOrEmpty(student.IpAddress)) student.IpAddress = ip;
+            student.DeviceId = deviceId; // Update in case they changed phone/browser
+            student.IpAddress = ip;
         }
 
+        await _db.SaveChangesAsync();
         // Calculate seconds until next UTC midnight reset
         var now = DateTime.UtcNow;
         var nextMidnight = now.Date.AddDays(1);
