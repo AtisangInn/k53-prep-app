@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace K53PrepApp.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class FixedUniversal : Migration
+    public partial class FinalProductionBaseline : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace K53PrepApp.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260402124236_FixedUniversal")]
-    partial class FixedUniversal
+    [Migration("20260402152810_FinalProductionBaseline")]
+    partial class FinalProductionBaseline
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
