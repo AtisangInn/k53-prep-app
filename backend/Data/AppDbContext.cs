@@ -15,6 +15,13 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Explicitly map to lowercase table names for PostgreSQL compatibility
+        modelBuilder.Entity<Student>().ToTable("students");
+        modelBuilder.Entity<Question>().ToTable("questions");
+        modelBuilder.Entity<TestResult>().ToTable("test_results");
+        modelBuilder.Entity<TestAnswer>().ToTable("test_answers");
+        modelBuilder.Entity<StudentPayment>().ToTable("student_payments");
+
         modelBuilder.Entity<Student>()
             .HasIndex(s => new { s.Name, s.Phone })
             .IsUnique();
