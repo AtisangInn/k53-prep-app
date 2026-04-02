@@ -6,13 +6,13 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace K53PrepApp.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialUniversal : Migration
+    public partial class FixedUniversal : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Questions",
+                name: "questions",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -32,11 +32,11 @@ namespace K53PrepApp.Api.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Questions", x => x.Id);
+                    table.PrimaryKey("PK_questions", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Students",
+                name: "students",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -58,11 +58,11 @@ namespace K53PrepApp.Api.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Students", x => x.Id);
+                    table.PrimaryKey("PK_students", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "StudentPayments",
+                name: "studentpayments",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -77,17 +77,17 @@ namespace K53PrepApp.Api.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_StudentPayments", x => x.Id);
+                    table.PrimaryKey("PK_studentpayments", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_StudentPayments_Students_StudentId",
+                        name: "FK_studentpayments_students_StudentId",
                         column: x => x.StudentId,
-                        principalTable: "Students",
+                        principalTable: "students",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "TestResults",
+                name: "testresults",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -104,17 +104,17 @@ namespace K53PrepApp.Api.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TestResults", x => x.Id);
+                    table.PrimaryKey("PK_testresults", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_TestResults_Students_StudentId",
+                        name: "FK_testresults_students_StudentId",
                         column: x => x.StudentId,
-                        principalTable: "Students",
+                        principalTable: "students",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "TestAnswers",
+                name: "testanswers",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -126,45 +126,45 @@ namespace K53PrepApp.Api.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TestAnswers", x => x.Id);
+                    table.PrimaryKey("PK_testanswers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_TestAnswers_Questions_QuestionId",
+                        name: "FK_testanswers_questions_QuestionId",
                         column: x => x.QuestionId,
-                        principalTable: "Questions",
+                        principalTable: "questions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_TestAnswers_TestResults_TestResultId",
+                        name: "FK_testanswers_testresults_TestResultId",
                         column: x => x.TestResultId,
-                        principalTable: "TestResults",
+                        principalTable: "testresults",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_StudentPayments_StudentId",
-                table: "StudentPayments",
+                name: "IX_studentpayments_StudentId",
+                table: "studentpayments",
                 column: "StudentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Students_Name_Phone",
-                table: "Students",
+                name: "IX_students_Name_Phone",
+                table: "students",
                 columns: new[] { "Name", "Phone" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_TestAnswers_QuestionId",
-                table: "TestAnswers",
+                name: "IX_testanswers_QuestionId",
+                table: "testanswers",
                 column: "QuestionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TestAnswers_TestResultId",
-                table: "TestAnswers",
+                name: "IX_testanswers_TestResultId",
+                table: "testanswers",
                 column: "TestResultId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TestResults_StudentId",
-                table: "TestResults",
+                name: "IX_testresults_StudentId",
+                table: "testresults",
                 column: "StudentId");
         }
 
@@ -172,19 +172,19 @@ namespace K53PrepApp.Api.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "StudentPayments");
+                name: "studentpayments");
 
             migrationBuilder.DropTable(
-                name: "TestAnswers");
+                name: "testanswers");
 
             migrationBuilder.DropTable(
-                name: "Questions");
+                name: "questions");
 
             migrationBuilder.DropTable(
-                name: "TestResults");
+                name: "testresults");
 
             migrationBuilder.DropTable(
-                name: "Students");
+                name: "students");
         }
     }
 }

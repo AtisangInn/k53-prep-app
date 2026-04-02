@@ -15,12 +15,13 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Explicitly map to lowercase table names for PostgreSQL compatibility
-        modelBuilder.Entity<Student>().ToTable("students");
-        modelBuilder.Entity<Question>().ToTable("questions");
-        modelBuilder.Entity<TestResult>().ToTable("test_results");
-        modelBuilder.Entity<TestAnswer>().ToTable("test_answers");
-        modelBuilder.Entity<StudentPayment>().ToTable("student_payments");
+        // Force all tables to lowercase for absolute PostgreSQL compatibility
+        foreach (var entity in modelBuilder.Model.GetEntityTypes())
+        {
+            var currentTableName = entity.GetTableName();
+            if (currentTableName != null)
+                entity.SetTableName(currentTableName.ToLower());
+        }
 
         modelBuilder.Entity<Student>()
             .HasIndex(s => new { s.Name, s.Phone })

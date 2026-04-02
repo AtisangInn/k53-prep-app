@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace K53PrepApp.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260402121512_InitialUniversal")]
-    partial class InitialUniversal
+    [Migration("20260402124236_FixedUniversal")]
+    partial class FixedUniversal
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -73,7 +73,7 @@ namespace K53PrepApp.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Questions");
+                    b.ToTable("questions");
                 });
 
             modelBuilder.Entity("K53PrepApp.Models.Student", b =>
@@ -133,7 +133,7 @@ namespace K53PrepApp.Api.Migrations
                     b.HasIndex("Name", "Phone")
                         .IsUnique();
 
-                    b.ToTable("Students");
+                    b.ToTable("students");
                 });
 
             modelBuilder.Entity("K53PrepApp.Models.StudentPayment", b =>
@@ -169,7 +169,7 @@ namespace K53PrepApp.Api.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("StudentPayments");
+                    b.ToTable("studentpayments");
                 });
 
             modelBuilder.Entity("K53PrepApp.Models.TestAnswer", b =>
@@ -196,7 +196,7 @@ namespace K53PrepApp.Api.Migrations
 
                     b.HasIndex("TestResultId");
 
-                    b.ToTable("TestAnswers");
+                    b.ToTable("testanswers");
                 });
 
             modelBuilder.Entity("K53PrepApp.Models.TestResult", b =>
@@ -236,7 +236,7 @@ namespace K53PrepApp.Api.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("TestResults");
+                    b.ToTable("testresults");
                 });
 
             modelBuilder.Entity("K53PrepApp.Models.StudentPayment", b =>
