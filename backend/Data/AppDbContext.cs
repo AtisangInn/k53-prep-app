@@ -22,7 +22,7 @@ public class AppDbContext : DbContext
             if (currentTableName != null)
                 entity.SetTableName(currentTableName.ToLower());
 
-            // Force native PostgreSQL types for dates and decimals
+            // Force native PostgreSQL types for dates, decimals, and booleans
             foreach (var property in entity.GetProperties())
             {
                 if (property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?))
@@ -32,6 +32,10 @@ public class AppDbContext : DbContext
                 else if (property.ClrType == typeof(decimal) || property.ClrType == typeof(decimal?))
                 {
                     property.SetColumnType("numeric");
+                }
+                else if (property.ClrType == typeof(bool) || property.ClrType == typeof(bool?))
+                {
+                    property.SetColumnType("boolean");
                 }
             }
         }

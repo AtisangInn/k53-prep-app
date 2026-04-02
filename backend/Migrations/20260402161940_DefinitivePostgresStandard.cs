@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace K53PrepApp.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class IroncladProduction : Migration
+    public partial class DefinitivePostgresStandard : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -27,7 +27,7 @@ namespace K53PrepApp.Api.Migrations
                     OptionD = table.Column<string>(nullable: false),
                     CorrectOption = table.Column<string>(nullable: false),
                     Explanation = table.Column<string>(nullable: false),
-                    IsActive = table.Column<bool>(nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
                 constraints: table =>
@@ -53,7 +53,7 @@ namespace K53PrepApp.Api.Migrations
                     LastFreeFlipDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     DeviceId = table.Column<string>(nullable: false),
                     IpAddress = table.Column<string>(nullable: false),
-                    IsPremium = table.Column<bool>(nullable: false),
+                    IsPremium = table.Column<bool>(type: "boolean", nullable: false),
                     PremiumUntil = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
@@ -122,7 +122,7 @@ namespace K53PrepApp.Api.Migrations
                     TestResultId = table.Column<int>(nullable: false),
                     QuestionId = table.Column<int>(nullable: false),
                     ChosenOption = table.Column<string>(nullable: true),
-                    IsCorrect = table.Column<bool>(nullable: false)
+                    IsCorrect = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {

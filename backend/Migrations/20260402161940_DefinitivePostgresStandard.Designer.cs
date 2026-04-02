@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace K53PrepApp.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260402154403_IroncladProduction")]
-    partial class IroncladProduction
+    [Migration("20260402161940_DefinitivePostgresStandard")]
+    partial class DefinitivePostgresStandard
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -45,7 +45,7 @@ namespace K53PrepApp.Api.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("OptionA")
                         .IsRequired()
@@ -106,7 +106,7 @@ namespace K53PrepApp.Api.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsPremium")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime?>("LastFreeFlipDate")
                         .HasColumnType("timestamp without time zone");
@@ -182,7 +182,7 @@ namespace K53PrepApp.Api.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsCorrect")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<int>("QuestionId")
                         .HasColumnType("INTEGER");

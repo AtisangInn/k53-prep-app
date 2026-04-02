@@ -42,7 +42,7 @@ namespace K53PrepApp.Api.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("OptionA")
                         .IsRequired()
@@ -103,7 +103,7 @@ namespace K53PrepApp.Api.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsPremium")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime?>("LastFreeFlipDate")
                         .HasColumnType("timestamp without time zone");
@@ -179,7 +179,7 @@ namespace K53PrepApp.Api.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsCorrect")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<int>("QuestionId")
                         .HasColumnType("INTEGER");
