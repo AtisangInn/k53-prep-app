@@ -113,6 +113,7 @@ try
                 }
             }
 
+            Console.WriteLine("!!! VERSION 5.0 - NUCLEAR POSTGRES STABILIZATION ACTIVE !!!");
             Console.WriteLine("--- Database Sync Started ---");
             var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
             Console.WriteLine($"Pending migrations: {pending.Count} ({string.Join(", ", pending)})");
