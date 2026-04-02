@@ -89,30 +89,48 @@ try
 
 
     // --- Auto-migrate and seed on startup ---
-    using (var scope = app.Services.CreateScope())
     {
         try
         {
+            using var scope = app.Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             
             // --- Emergency Reset Logic ---
             if (Environment.GetEnvironmentVariable("RESET_DB") == "true")
             {
-                Console.WriteLine("CRITICAL: RESET_DB is true. Dropping all tables...");
+                Console.WriteLine("!!! CRITICAL: RESET_DB is true. Dropping all tables...");
                 db.Database.EnsureDeleted();
-                Console.WriteLine("Tables dropped successfully.");
+                Console.WriteLine("!!! Tables dropped successfully.");
             }
 
-            Console.WriteLine("Initialising database and applying migrations...");
-            db.Database.Migrate();
+            Console.WriteLine("--- Database Sync Started ---");
+            var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
+            Console.WriteLine($"Pending migrations: {pending.Count} ({string.Join(", ", pending)})");
+
+            if (pending.Any())
+            {
+                Console.WriteLine("Applying migrations...");
+                await db.Database.MigrateAsync();
+                Console.WriteLine("Migrations applied successfully.");
+            }
+            else
+            {
+                Console.WriteLine("No pending migrations found. Verifying tables exist...");
+                // Fallback for missing tables despite no pending migrations
+                db.Database.EnsureCreated();
+            }
+
             SeedData.Seed(db);
-            Console.WriteLine("Database initialised and seeded successfully.");
+            Console.WriteLine("--- Database Sync Completed Successfully ---");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"FATAL: Database initialization failed: {ex.Message}");
+            Console.WriteLine($"!!! DATABASE ERROR during startup: {ex.Message}");
+            Console.WriteLine($"Stack Trace: {ex.StackTrace}");
             if (ex.InnerException != null)
-                Console.WriteLine($"Inner Error: {ex.InnerException.Message}");
+            {
+                Console.WriteLine($"!!! INNER ERROR: {ex.InnerException.Message}");
+            }
         }
     }
 
