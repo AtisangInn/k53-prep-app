@@ -91,17 +91,28 @@ try
     // --- Auto-migrate and seed on startup ---
     using (var scope = app.Services.CreateScope())
     {
-        try 
+        try
         {
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            Console.WriteLine("Initializing database and applying migrations...");
+            
+            // --- Emergency Reset Logic ---
+            if (Environment.GetEnvironmentVariable("RESET_DB") == "true")
+            {
+                Console.WriteLine("CRITICAL: RESET_DB is true. Dropping all tables...");
+                db.Database.EnsureDeleted();
+                Console.WriteLine("Tables dropped successfully.");
+            }
+
+            Console.WriteLine("Initialising database and applying migrations...");
             db.Database.Migrate();
             SeedData.Seed(db);
-            Console.WriteLine("Database initialized and seeded.");
+            Console.WriteLine("Database initialised and seeded successfully.");
         }
         catch (Exception ex)
         {
             Console.WriteLine($"FATAL: Database initialization failed: {ex.Message}");
+            if (ex.InnerException != null)
+                Console.WriteLine($"Inner Error: {ex.InnerException.Message}");
         }
     }
 

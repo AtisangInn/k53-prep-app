@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace K53PrepApp.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260402025358_AddDailyFreeFlips")]
-    partial class AddDailyFreeFlips
+    [Migration("20260402121512_InitialUniversal")]
+    partial class InitialUniversal
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -82,6 +82,10 @@ namespace K53PrepApp.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("DeviceId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("FirstSeen")
                         .HasColumnType("TEXT");
 
@@ -91,8 +95,15 @@ namespace K53PrepApp.Api.Migrations
                     b.Property<int>("FreeFlipsToday")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("FreeNextsToday")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("FreeTestsUsed")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("IpAddress")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("IsPremium")
                         .HasColumnType("INTEGER");
