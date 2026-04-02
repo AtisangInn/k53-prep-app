@@ -98,9 +98,19 @@ try
             // --- Emergency Reset Logic ---
             if (Environment.GetEnvironmentVariable("RESET_DB") == "true")
             {
-                Console.WriteLine("!!! CRITICAL: RESET_DB is true. Dropping all tables...");
-                db.Database.EnsureDeleted();
-                Console.WriteLine("!!! Tables dropped successfully.");
+                Console.WriteLine("!!! NUCLEAR RESET: Wiping schema for PostgreSQL stability...");
+                try 
+                {
+                    // This is the definitive way to wipe a Postgres DB when tables are stuck
+                    await db.Database.ExecuteSqlRawAsync("DROP SCHEMA public CASCADE; CREATE SCHEMA public;");
+                    Console.WriteLine("!!! DB PURGED SUCCESSFULLY.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"!!! PURGE WARNING: {ex.Message}");
+                    // Fallback to polite delete if raw SQL fails
+                    db.Database.EnsureDeleted();
+                }
             }
 
             Console.WriteLine("--- Database Sync Started ---");
