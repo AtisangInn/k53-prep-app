@@ -12,7 +12,34 @@ public class Student
     public int FlippedCardsCount { get; set; }
     public int TotalStudySeconds { get; set; }
 
+    // Freemium / Premium
+    public int FreeTestsUsed { get; set; } = 0;
+    public int FreeFlipsToday { get; set; } = 0;
+    public int FreeNextsToday { get; set; } = 0;
+    public DateTime? LastFreeFlipDate { get; set; }
+    
+    // Anti-Abuse
+    public string DeviceId { get; set; } = string.Empty;
+    public string IpAddress { get; set; } = string.Empty;
+    
+    public bool IsPremium { get; set; } = false;
+    public DateTime? PremiumUntil { get; set; }
+
     public ICollection<TestResult> TestResults { get; set; } = new List<TestResult>();
+    public ICollection<StudentPayment> Payments { get; set; } = new List<StudentPayment>();
+}
+
+public class StudentPayment
+{
+    public int Id { get; set; }
+    public int StudentId { get; set; }
+    public Student Student { get; set; } = null!;
+    public string MPaymentId { get; set; } = string.Empty;   // our unique reference
+    public string? PfPaymentId { get; set; }                  // PayFast's payment ID
+    public decimal Amount { get; set; }
+    public string Status { get; set; } = "pending";           // pending | complete | cancelled
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? CompletedAt { get; set; }
 }
 
 public class TestResult

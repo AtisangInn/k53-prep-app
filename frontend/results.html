@@ -28,17 +28,17 @@
 <main class="max-w-4xl mx-auto p-4 md:p-8 space-y-8">
 
   <!-- Header -->
-  <header class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+  <header class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-2">
     <div>
-      <h1 class="text-3xl font-bold tracking-tight text-slate-900"><span class="school-name"></span> K53 Test Results</h1>
-      <p class="text-slate-500">Comprehensive breakdown of your practice session.</p>
+      <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white"><span class="school-name"></span> K53 Test Results</h1>
+      <p class="text-slate-500 dark:text-gray-400 text-sm">Comprehensive breakdown of your practice session.</p>
     </div>
-    <div class="flex gap-3 items-center">
-      <button onclick="toggleTheme()" class="theme-toggle-btn" title="Toggle dark mode">
+    <div class="flex flex-wrap gap-2 items-center">
+      <button onclick="toggleTheme()" class="theme-toggle-btn shrink-0" title="Toggle dark mode">
         <span class="theme-toggle-icon"></span>
       </button>
-      <span id="result-date" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-eight shadow-sm text-sm font-semibold text-slate-700"></span>
-      <span id="overall-badge" class="flex items-center gap-2 px-4 py-2 rounded-eight text-sm font-bold"></span>
+      <span id="result-date" class="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-eight shadow-sm text-xs font-semibold text-slate-700 dark:text-gray-300"></span>
+      <span id="overall-badge" class="flex items-center gap-2 px-3 py-1.5 rounded-eight text-xs font-bold"></span>
     </div>
   </header>
 
@@ -46,35 +46,46 @@
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
     <!-- Readiness circle -->
-    <section class="md:col-span-1 bg-white p-6 rounded-eight shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center">
-      <h2 class="text-lg font-semibold mb-4">Overall Readiness</h2>
+    <section class="md:col-span-1 bg-white dark:bg-gray-800 p-6 rounded-eight shadow-sm border border-slate-100 dark:border-gray-700 flex flex-col items-center justify-center text-center transition-colors">
+      <h2 class="text-lg font-semibold mb-4 dark:text-white">Overall Readiness</h2>
       <div class="relative w-40 h-40 flex items-center justify-center">
         <svg class="w-40 h-40 absolute top-0 left-0" viewBox="0 0 160 160">
-          <circle class="circular-track" cx="80" cy="80" r="66"/>
+          <circle class="circular-track dark:stroke-gray-700" cx="80" cy="80" r="66"/>
           <circle id="readiness-arc" class="circular-fill" cx="80" cy="80" r="66"
             stroke-dasharray="415" stroke-dashoffset="415"/>
         </svg>
         <div class="text-center z-10">
           <span id="readiness-pct" class="block text-4xl font-bold text-primary">0%</span>
-          <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">Ready</span>
+          <span class="text-xs uppercase font-bold text-slate-400 dark:text-gray-500 tracking-wider">Ready</span>
         </div>
       </div>
-      <p id="readiness-msg" class="mt-4 text-sm text-slate-500"></p>
+      <p id="readiness-msg" class="mt-4 text-sm text-slate-500 dark:text-gray-400"></p>
     </section>
 
     <!-- Category performance -->
-    <section class="md:col-span-2 bg-white p-6 rounded-eight shadow-sm border border-slate-100">
-      <h2 class="text-lg font-semibold mb-4">Performance Summary</h2>
+    <section class="md:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-eight shadow-sm border border-slate-100 dark:border-gray-700 transition-colors">
+      <h2 class="text-lg font-semibold mb-4 dark:text-white">Performance Summary</h2>
       <div id="category-cards" class="space-y-4"></div>
     </section>
   </div>
 
   <!-- Incorrect answers review -->
-  <section class="bg-white p-6 rounded-eight shadow-sm border border-slate-100">
-    <h2 class="text-lg font-semibold mb-2">Questions to Review</h2>
-    <p class="text-sm text-slate-500 mb-6">These are the questions you got wrong. Study them before your next attempt.</p>
-    <div id="wrong-answers" class="space-y-4"></div>
-    <p id="all-correct-msg" class="hidden text-green-600 font-semibold text-center py-8">🎉 You got every question correct!</p>
+  <section class="bg-white rounded-eight shadow-sm border border-slate-100 relative overflow-hidden">
+    <div id="premium-corrections-lock" class="hidden absolute inset-0 z-20 backdrop-blur-md bg-white/70 max-h-full flex flex-col items-center justify-center p-6 text-center">
+      <div class="w-16 h-16 bg-red-100 text-primary rounded-full flex items-center justify-center mb-4 text-3xl shadow-sm">🔒</div>
+      <h3 class="text-2xl font-black mb-2 text-slate-900">Detailed Corrections Locked</h3>
+      <p class="text-slate-600 mb-6 max-w-sm">Upgrade to Premium to see exactly which questions you got wrong and read the full explanations.</p>
+      <button onclick="checkout()" class="px-8 py-3 bg-primary text-white font-bold rounded-xl hover:bg-red-700 transition shadow-lg">
+        Unlock Premium — R79
+      </button>
+    </div>
+
+    <div class="p-6">
+      <h2 class="text-lg font-semibold mb-2">Questions to Review</h2>
+      <p class="text-sm text-slate-500 mb-6">These are the questions you got wrong. Study them before your next attempt.</p>
+      <div id="wrong-answers" class="space-y-4"></div>
+      <p id="all-correct-msg" class="hidden text-green-600 font-semibold text-center py-8">🎉 You got every question correct!</p>
+    </div>
   </section>
 
   <!-- Actions -->
@@ -166,7 +177,22 @@ function render() {
   // Wrong answers
   const wrong = (result.answers || []).filter(a => !a.isCorrect);
   const wrongEl = document.getElementById('wrong-answers');
-  if (wrong.length === 0) {
+  
+  if (!window.studentStatus.isPremium) {
+     if (wrong.length > 0) {
+         document.getElementById('premium-corrections-lock').classList.remove('hidden');
+         // create a fake preview to blur
+         wrongEl.innerHTML = `
+           <div class="p-4 bg-slate-50 rounded-eight border border-slate-100 opacity-50 blur-sm pointer-events-none">
+             <span class="text-xs font-bold text-fail uppercase tracking-wider">RULES</span>
+             <p class="font-medium text-slate-900 mt-2">When are you allowed to pass another vehicle on the left?</p>
+             <p class="text-sm text-slate-500 mt-2">Your Answer: <span class="text-fail line-through">Only on a one-way street</span></p>
+           </div>
+         `;
+     } else {
+         document.getElementById('all-correct-msg').classList.remove('hidden');
+     }
+  } else if (wrong.length === 0) {
     wrongEl.classList.add('hidden');
     document.getElementById('all-correct-msg').classList.remove('hidden');
   } else {
@@ -198,6 +224,26 @@ function render() {
         </div>
       </div>
     `).join('');
+  }
+}
+
+async function checkout() {
+  try {
+    const data = await PaymentService.createCheckout(window.studentStatus.id);
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = data.url;
+    for (const field of data.fields) {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = field.name;
+      input.value = field.value;
+      form.appendChild(input);
+    }
+    document.body.appendChild(form);
+    form.submit();
+  } catch (err) {
+    alert(err.message);
   }
 }
 

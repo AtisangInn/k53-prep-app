@@ -11,6 +11,7 @@ public class AppDbContext : DbContext
     public DbSet<Student> Students => Set<Student>();
     public DbSet<TestResult> TestResults => Set<TestResult>();
     public DbSet<TestAnswer> TestAnswers => Set<TestAnswer>();
+    public DbSet<StudentPayment> StudentPayments => Set<StudentPayment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -32,5 +33,10 @@ public class AppDbContext : DbContext
             .HasOne(a => a.Question)
             .WithMany()
             .HasForeignKey(a => a.QuestionId);
+
+        modelBuilder.Entity<StudentPayment>()
+            .HasOne(p => p.Student)
+            .WithMany(s => s.Payments)
+            .HasForeignKey(p => p.StudentId);
     }
 }

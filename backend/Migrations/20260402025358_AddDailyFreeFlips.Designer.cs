@@ -3,6 +3,7 @@ using System;
 using K53PrepApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace K53PrepApp.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260402025358_AddDailyFreeFlips")]
+    partial class AddDailyFreeFlips
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
@@ -79,10 +82,6 @@ namespace K53PrepApp.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("DeviceId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<DateTime>("FirstSeen")
                         .HasColumnType("TEXT");
 
@@ -92,15 +91,8 @@ namespace K53PrepApp.Api.Migrations
                     b.Property<int>("FreeFlipsToday")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("FreeNextsToday")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("FreeTestsUsed")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("IpAddress")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.Property<bool>("IsPremium")
                         .HasColumnType("INTEGER");

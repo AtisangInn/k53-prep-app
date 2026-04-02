@@ -26,38 +26,56 @@
 
 <!-- Header -->
 <header class="bg-white border-b border-gray-200 sticky top-0 z-10">
-  <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-    <div class="flex items-center gap-2">
-      <div class="w-10 h-10 bg-primary flex items-center justify-center rounded-custom text-white font-bold text-xl school-logo-placeholder">K</div>
-      <h1 class="text-xl font-bold tracking-tight"><span class="school-name"></span> K53 Practice Test</h1>
-    </div>
-    <div class="flex items-center gap-3">
-      <button onclick="toggleTheme()" class="theme-toggle-btn" title="Toggle dark mode">
-        <span class="theme-toggle-icon"></span>
-      </button>
-      <div id="test-timer" class="flex items-center gap-3 bg-red-50 px-4 py-2 rounded-custom border border-red-100">
-      <svg class="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-      </svg>
-      <span id="timer-display" class="font-mono text-lg font-bold text-red-600">58:00</span>
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2 overflow-hidden">
+        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-primary flex items-center justify-center rounded-custom text-white font-bold text-lg school-logo-placeholder shrink-0">K</div>
+        <h1 class="text-sm sm:text-xl font-bold tracking-tight truncate"><span class="school-name"></span> Test</h1>
+      </div>
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button onclick="toggleTheme()" class="theme-toggle-btn" title="Toggle dark mode">
+          <span class="theme-toggle-icon"></span>
+        </button>
+        <div id="test-timer" class="flex items-center gap-1.5 sm:gap-3 bg-red-50 dark:bg-red-900/10 px-2 sm:px-4 py-1.5 sm:py-2 rounded-custom border border-red-100 dark:border-red-900/30">
+          <svg class="h-4 w-4 sm:h-5 sm:w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span id="timer-display" class="font-mono text-sm sm:text-lg font-bold text-red-600">58:00</span>
+        </div>
       </div>
     </div>
-  </div>
 </header>
 
 <!-- Loading state -->
 <div id="loading-state" class="flex flex-col items-center justify-center min-h-96 text-gray-500 gap-4">
   <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-  <p>Preparing your test...</p>
+  <p>Loading...</p>
 </div>
+
+<!-- Paywall state -->
+<div id="paywall-state" class="hidden flex flex-col items-center justify-center min-h-[60vh] px-4">
+  <div class="bg-white dark:bg-gray-800 p-8 md:p-12 rounded-2xl shadow-xl max-w-md w-full text-center border-t-4 border-primary">
+    <div class="w-16 h-16 bg-red-100 text-primary rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">🔒</div>
+    <h2 class="text-3xl font-black mb-2 text-gray-900 dark:text-white">Limit Reached</h2>
+    <p class="text-gray-500 dark:text-gray-400 mb-6 leading-relaxed">
+      You've used your 2 free mock exams. Upgrade for <strong>unlimited access</strong> or come back in:
+    </p>
+    <div class="mb-8 p-4 bg-slate-50 dark:bg-gray-700/50 rounded-xl border border-slate-100 dark:border-gray-700">
+      <span id="refresh-timer" class="font-mono text-2xl font-black text-primary tracking-widest">--:--:--</span>
+      <p class="text-[10px] uppercase font-bold text-gray-400 mt-1">Until Daily Refresh</p>
+    </div>
+    <button onclick="checkout()" class="w-full bg-primary text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:opacity-90 transition mb-4">
+      Unlock Premium — R79
+    </button>
+    <a href="study.html" class="block text-gray-500 hover:text-primary font-medium transition">Back to Free Study Hub</a>
+  </div>
+</div>
+
 
 <!-- Test content (hidden until loaded) -->
 <div id="test-content" class="hidden">
 <main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
 
   <!-- Question area -->
-  <section class="lg:col-span-2 space-y-6">
-    <div class="bg-white p-6 md:p-8 rounded-custom shadow-sm border border-gray-100 min-h-[420px] md:min-h-[520px] flex flex-col relative">
+  <section class="lg:col-span-2 space-y-4 md:space-y-6">
+    <div class="bg-white dark:bg-gray-800 p-5 md:p-8 rounded-custom shadow-sm border border-gray-100 dark:border-gray-700 min-h-[380px] md:min-h-[520px] flex flex-col relative transition-colors">
       <div class="flex items-center justify-between mb-6">
         <span id="q-counter" class="text-sm font-semibold text-primary uppercase tracking-wider">Question 1 of 64</span>
         <span id="q-category" class="text-xs text-gray-400">Rules of the Road</span>
@@ -138,6 +156,17 @@ let testSubmitting = false;
 
 async function init() {
   try {
+    const status = await apiFetch(`/payments/student/${student.id}/status`);
+    if (status.secondsUntilRefresh) {
+      startRefreshCountdown(status.secondsUntilRefresh);
+    }
+    
+    if (!status.isPremium && status.freeTestsRemaining <= 0) {
+      document.getElementById('loading-state').classList.add('hidden');
+      document.getElementById('paywall-state').classList.remove('hidden');
+      return;
+    }
+
     questions = await apiFetch('/questions/test');
     document.getElementById('loading-state').classList.add('hidden');
     document.getElementById('test-content').classList.remove('hidden');
@@ -147,6 +176,56 @@ async function init() {
   } catch(e) {
     document.getElementById('loading-state').innerHTML =
       `<p class="text-red-500">Failed to load test: ${e.message}</p>`;
+  }
+}
+
+let refreshInterval;
+function startRefreshCountdown(seconds) {
+    if (refreshInterval) clearInterval(refreshInterval);
+    let remaining = seconds;
+    
+    function updateDisplay() {
+        const timerEl = document.getElementById('refresh-timer');
+        if (!timerEl) return;
+        
+        if (remaining <= 0) {
+            timerEl.textContent = "00:00:00";
+            location.reload(); 
+            return;
+        }
+        
+        const h = Math.floor(remaining / 3600);
+        const m = Math.floor((remaining % 3600) / 60);
+        const s = Math.floor(remaining % 60);
+        timerEl.textContent = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        remaining--;
+    }
+    updateDisplay();
+    refreshInterval = setInterval(updateDisplay, 1000);
+}
+
+async function checkout() {
+  try {
+    const btn = document.querySelector('#paywall-state button');
+    btn.textContent = 'Redirecting to PayFast...';
+    btn.disabled = true;
+
+    const data = await PaymentService.createCheckout(student.id);
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = data.url;
+    for (const field of data.fields) {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = field.name;
+      input.value = field.value;
+      form.appendChild(input);
+    }
+    document.body.appendChild(form);
+    form.submit();
+  } catch (e) {
+    alert('Checkout failed: ' + e.message);
+    window.location.reload();
   }
 }
 

@@ -32,21 +32,81 @@ public class StudentsController : ControllerBase
         if (string.IsNullOrWhiteSpace(dto.Name) || string.IsNullOrWhiteSpace(dto.Phone))
             return BadRequest("Name and phone are required.");
 
-        var student = await _db.Students
-            .FirstOrDefaultAsync(s => s.Name == dto.Name.Trim() && s.Phone == dto.Phone.Trim());
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        var deviceId = !string.IsNullOrWhiteSpace(dto.DeviceId) ? dto.DeviceId : Guid.NewGuid().ToString();
 
+        // 1. Try exact match
+        var student = await _db.Students
+            .FirstOrDefaultAsync(s => s.DeviceId == deviceId && s.Name == dto.Name.Trim() && s.Phone == dto.Phone.Trim());
+
+        // 2. If no exact match but DeviceId is provided, force them to their original account for this device
+        if (student == null && !string.IsNullOrWhiteSpace(dto.DeviceId))
+        {
+            var existingDeviceStudent = await _db.Students.FirstOrDefaultAsync(s => s.DeviceId == dto.DeviceId);
+            if (existingDeviceStudent != null)
+            {
+                student = existingDeviceStudent;
+            }
+        }
+
+        // 3. Fallback tracking logic (IP Limit: max 1 per 24 hours to stop device wipe bypass)
         if (student == null)
         {
-            student = new Student { Name = dto.Name.Trim(), Phone = dto.Phone.Trim() };
-            _db.Students.Add(student);
+            var yesterday = DateTime.UtcNow.AddHours(-24);
+            var ipAccountsCount = await _db.Students.CountAsync(s => s.IpAddress == ip && s.FirstSeen >= yesterday);
+            if (ipAccountsCount >= 1)
+            {
+                // Find most recent account for this IP and force login
+                var recentStudent = await _db.Students.Where(s => s.IpAddress == ip).OrderByDescending(s => s.FirstSeen).FirstOrDefaultAsync();
+                if (recentStudent != null) student = recentStudent;
+                else return BadRequest("Max profile creation limit reached for this IP limit.");
+            }
+            else
+            {
+                student = new Student { 
+                    Name = dto.Name.Trim(), 
+                    Phone = dto.Phone.Trim(),
+                    DeviceId = deviceId,
+                    IpAddress = ip
+                };
+                _db.Students.Add(student);
+            }
         }
         else
         {
             student.LastSeen = DateTime.UtcNow;
+            if (string.IsNullOrEmpty(student.DeviceId)) student.DeviceId = deviceId;
+            if (string.IsNullOrEmpty(student.IpAddress)) student.IpAddress = ip;
+        }
+
+        // Calculate seconds until next UTC midnight reset
+        var now = DateTime.UtcNow;
+        var nextMidnight = now.Date.AddDays(1);
+        var secondsUntilRefresh = (int)(nextMidnight - now).TotalSeconds;
+
+        // Reset daily limits if it's a new day
+        var today = DateTime.UtcNow.Date;
+        if (student.LastFreeFlipDate?.Date != today)
+        {
+            student.FreeFlipsToday = 0;
+            student.FreeNextsToday = 0;
+            student.FreeTestsUsed = 0; // Reset mock exams daily
+            student.LastFreeFlipDate = today;
         }
 
         await _db.SaveChangesAsync();
-        return Ok(new { student.Id, student.Name, student.Phone });
+        return Ok(new {
+            student.Id,
+            student.Name,
+            student.Phone,
+            student.DeviceId,
+            student.IsPremium,
+            student.FreeFlipsToday,
+            student.FreeNextsToday,
+            student.FreeTestsUsed,
+            freeTestsRemaining = Math.Max(0, 2 - student.FreeTestsUsed),
+            secondsUntilRefresh
+        });
     }
 
     // GET /api/students - admin: list all students with stats
@@ -70,7 +130,14 @@ public class StudentsController : ControllerBase
                 LastPass = s.TestResults
                     .OrderByDescending(t => t.TakenAt)
                     .Select(t => (bool?)t.OverallPass)
-                    .FirstOrDefault()
+                    .FirstOrDefault(),
+                s.IsPremium,
+                s.PremiumUntil,
+                s.FreeFlipsToday,
+                s.FreeNextsToday,
+                s.FreeTestsUsed,
+                s.DeviceId,
+                s.IpAddress
             })
             .ToListAsync();
 
@@ -114,6 +181,114 @@ public class StudentsController : ControllerBase
         student.LastSeen = DateTime.UtcNow;
         await _db.SaveChangesAsync();
         return Ok(new { student.FlippedCardsCount, student.TotalStudySeconds });
+    }
+
+    // POST /api/students/{id}/flip - check and increment free flip limit
+    [HttpPost("{id}/flip")]
+    public async Task<IActionResult> RequestFlip(int id)
+    {
+        var student = await _db.Students.FindAsync(id);
+        if (student == null) return NotFound();
+
+        var now = DateTime.UtcNow;
+        var nextMidnight = now.Date.AddDays(1);
+        var secondsUntilRefresh = (int)(nextMidnight - now).TotalSeconds;
+
+        if (student.IsPremium) return Ok(new { allowed = true, remaining = -1, secondsUntilRefresh });
+
+        var today = now.Date;
+        if (student.LastFreeFlipDate?.Date != today)
+        {
+            student.FreeFlipsToday = 0;
+            student.FreeNextsToday = 0;
+            student.FreeTestsUsed = 0;
+            student.LastFreeFlipDate = today;
+        }
+
+        // Check 10 flip limit (reduced per user request)
+        if (student.FreeFlipsToday >= 10)
+        {
+            return Ok(new { allowed = false, remaining = 0, secondsUntilRefresh });
+        }
+
+        student.FreeFlipsToday++;
+        student.LastSeen = now;
+        await _db.SaveChangesAsync();
+
+        return Ok(new { allowed = true, remaining = 10 - student.FreeFlipsToday, secondsUntilRefresh });
+    }
+
+    // POST /api/students/{id}/next - check and increment free next limit
+    [HttpPost("{id}/next")]
+    public async Task<IActionResult> RequestNext(int id)
+    {
+        var student = await _db.Students.FindAsync(id);
+        if (student == null) return NotFound();
+
+        var now = DateTime.UtcNow;
+        var nextMidnight = now.Date.AddDays(1);
+        var secondsUntilRefresh = (int)(nextMidnight - now).TotalSeconds;
+
+        if (student.IsPremium) return Ok(new { allowed = true, remaining = -1, secondsUntilRefresh });
+
+        var today = now.Date;
+        if (student.LastFreeFlipDate?.Date != today)
+        {
+            student.FreeFlipsToday = 0;
+            student.FreeNextsToday = 0;
+            student.FreeTestsUsed = 0;
+            student.LastFreeFlipDate = today;
+        }
+
+        // Check 30 next limit
+        if (student.FreeNextsToday >= 30)
+        {
+            return Ok(new { allowed = false, remaining = 0, secondsUntilRefresh });
+        }
+
+        student.FreeNextsToday++;
+        student.LastSeen = now;
+        await _db.SaveChangesAsync();
+
+        return Ok(new { allowed = true, remaining = 30 - student.FreeNextsToday, secondsUntilRefresh });
+    }
+
+    // POST /api/students/{id}/premium-grant - admin: manually add 30 days premium
+    [HttpPost("{id}/premium-grant")]
+    public async Task<IActionResult> GrantPremium(int id, [FromHeader(Name = "X-Admin-Code")] string? adminCode)
+    {
+        if (adminCode != AdminCode) return Unauthorized();
+
+        var student = await _db.Students.FindAsync(id);
+        if (student == null) return NotFound();
+
+        student.IsPremium = true;
+        student.PremiumUntil = DateTime.UtcNow.AddDays(30);
+        await _db.SaveChangesAsync();
+
+        return Ok(new { student.IsPremium, student.PremiumUntil });
+    }
+
+    // POST /api/students/{id}/reset-limits - admin: manually reset daily counters
+    [HttpPost("{id}/reset-limits")]
+    public async Task<IActionResult> ResetLimits(int id, [FromHeader(Name = "X-Admin-Code")] string? adminCode)
+    {
+        if (adminCode != AdminCode) return Unauthorized();
+
+        var student = await _db.Students.FindAsync(id);
+        if (student == null) return NotFound();
+
+        student.FreeFlipsToday = 0;
+        student.FreeNextsToday = 0;
+        student.FreeTestsUsed = 0;
+        student.LastFreeFlipDate = DateTime.UtcNow.Date;
+        await _db.SaveChangesAsync();
+
+        return Ok(new { 
+            student.FreeFlipsToday, 
+            student.FreeNextsToday, 
+            student.FreeTestsUsed 
+        });
     }
 
     // DELETE /api/students/{id} - admin: delete student
@@ -205,6 +380,11 @@ public class TestsController : ControllerBase
         }
 
         student.LastSeen = DateTime.UtcNow;
+
+        // Increment free test counter for non-premium students
+        if (!student.IsPremium)
+            student.FreeTestsUsed = Math.Min(student.FreeTestsUsed + 1, 99);
+
         _db.TestResults.Add(result);
         await _db.SaveChangesAsync();
 
@@ -290,7 +470,7 @@ public class TestsController : ControllerBase
 }
 
 // DTOs
-public record IdentifyDto(string Name, string Phone);
+public record IdentifyDto(string Name, string Phone, string? DeviceId = null);
 public record ActivityUpdateDto(int FlippedIncrement, int StudySecondsIncrement);
 public record TestSubmissionDto(int StudentId, int DurationSeconds, List<AnswerDto> Answers);
 public record AnswerDto(int QuestionId, string? ChosenOption);

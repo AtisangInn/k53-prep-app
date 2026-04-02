@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Successful – K53 Academy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com/3.4.1"></script>
+  <link rel="stylesheet" href="assets/css/dark.css">
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { primary: '#c1272d' }, fontFamily: { sans: ['Lexend', 'sans-serif'] } } }
+    }
+  </script>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex items-center justify-center p-4 transition-colors duration-200">
+
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-8 text-center relative overflow-hidden">
+    <!-- Success Icon -->
+    <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+      <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+      </svg>
+    </div>
+
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Payment Successful!</h1>
+    <p class="text-gray-500 dark:text-gray-400 mb-8">
+      Welcome to Premium! Your account has been upgraded. You now have unlimited mock exams and full handbook access for 30 days.
+    </p>
+
+    <!-- Loading state while waiting for webhook -->
+    <div id="loading-state" class="mb-8 hidden">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+      <p class="text-sm text-gray-500">Activating your premium features...</p>
+    </div>
+
+    <div class="space-y-4">
+      <a href="test.html" class="block w-full bg-primary text-white py-3 rounded-xl font-bold hover:bg-red-700 transition">
+        Take a Mock Exam
+      </a>
+      <a href="study.html" class="block w-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white py-3 rounded-xl font-bold hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+        Read the Handbook
+      </a>
+    </div>
+  </div>
+
+  <script src="assets/js/theme.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script>
+    // Optionally we could poll the student's status here to wait for the webhook
+    const studentInfoStr = localStorage.getItem('k53_student');
+    if (studentInfoStr) {
+      const student = JSON.parse(studentInfoStr);
+      // Give the backend webhook 2 seconds to process
+      setTimeout(async () => {
+        try {
+            const res = await fetch(`${API_BASE}/api/payments/student/${student.id}/status`);
+            const data = await res.json();
+            if (data.isPremium) {
+                student.isPremium = true;
+                localStorage.setItem('k53_student', JSON.stringify(student));
+            }
+        } catch (e) {
+            console.error("Could not fetch status update", e);
+        }
+      }, 2000);
+    }
+  </script>
+</body>
+</html>

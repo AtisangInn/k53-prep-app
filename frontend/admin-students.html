@@ -87,8 +87,8 @@
     </div>
 
     <!-- Stats row -->
-    <div class="grid grid-cols-4 gap-4 mb-8">
-      <div class="bg-white p-5 rounded-custom border border-gray-200 shadow-sm">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div class="bg-white dark:bg-gray-800 p-5 rounded-custom border border-gray-200 dark:border-gray-700 shadow-sm transition-colors">
         <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Total Students</p>
         <p id="stat-total" class="text-3xl font-bold text-primary mt-1">—</p>
       </div>
@@ -201,31 +201,53 @@ function renderTable(students) {
     const firstSeen = new Date(s.firstSeen).toLocaleDateString('en-ZA', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
     const lastSeenFormatted = new Date(s.lastSeen).toLocaleDateString('en-ZA', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
 
+    const statusBadge = s.isPremium 
+      ? '<span class="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-[10px] font-bold">💎 PREMIUM</span>'
+      : '<span class="px-2 py-1 bg-gray-100 text-gray-400 rounded-full text-[10px] uppercase font-bold">Free</span>';
+
     return `
     <tr class="hover:bg-gray-50 transition-colors">
       <td class="px-6 py-4">
         <div class="flex items-center gap-3">
           <div class="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold">${initials}</div>
-          <span class="font-medium">${s.name}</span>
+          <div>
+            <div class="font-medium flex items-center gap-2">${s.name} ${statusBadge}</div>
+            <div class="text-[10px] text-gray-400 font-mono">${s.deviceId?.substring(0,8)}...</div>
+          </div>
         </div>
       </td>
       <td class="px-6 py-4 text-gray-400 text-xs">${s.phone}</td>
       <td class="px-6 py-4 text-gray-500 text-xs whitespace-nowrap">${firstSeen}</td>
       <td class="px-6 py-4 text-gray-500 text-xs whitespace-nowrap">${lastSeenFormatted}</td>
-      <td class="px-6 py-4 font-bold text-slate-700">${s.flippedCardsCount || 0}</td>
-      <td class="px-6 py-4 text-gray-500">${studyTimeStr}</td>
+      <td class="px-6 py-4 font-bold text-slate-700">
+        <div class="text-xs">Flips: ${s.flippedCardsCount || 0}</div>
+        <div class="text-[10px] text-gray-400 uppercase tracking-tighter">Daily: ${s.freeFlipsToday}/10</div>
+      </td>
+      <td class="px-6 py-4 text-gray-500">
+        <div class="text-xs">${studyTimeStr}</div>
+        <div class="text-[10px] text-gray-400 uppercase tracking-tighter">Nexts: ${s.freeNextsToday}/30</div>
+      </td>
       <td class="px-6 py-4 font-semibold">${s.testCount}</td>
-      <td class="px-6 py-4">${s.lastScore != null ? s.lastScore + '/64' : '—'}</td>
+      <td class="px-6 py-4 font-semibold">${s.freeTestsUsed}/2</td>
       <td class="px-6 py-4">${passLabel}</td>
-      <td class="px-6 py-4">
-        <div class="flex items-center gap-2">
+      <td class="px-6 py-4 text-right">
+        <div class="flex items-center justify-end gap-2">
+          ${!s.isPremium ? `
+          <button onclick="grantPremium(${s.id}, '${s.name.replace(/'/g, "\\'")}')"
+            class="text-[10px] px-2 py-1 rounded bg-amber-500 text-white font-bold hover:bg-amber-600 shadow-sm transition" title="Give 30 Days Premium">
+            💎 Grant
+          </button>` : ''}
+          <button onclick="resetLimits(${s.id}, '${s.name.replace(/'/g, "\\'")}')"
+            class="text-[10px] px-2 py-1 rounded bg-blue-500 text-white font-bold hover:bg-blue-600 shadow-sm transition" title="Reset Today's Limits">
+            🔄 Reset
+          </button>
           <button onclick="viewHistory(${s.id}, '${s.name.replace(/'/g, "\\'")}')"
-            class="text-xs px-3 py-1 rounded border border-gray-200 hover:bg-gray-50 text-gray-600 font-medium">
-            History
+            class="p-1 hover:bg-gray-100 rounded text-gray-400" title="History">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           </button>
           <button onclick="deleteStudent(${s.id}, '${s.name.replace(/'/g, "\\'")}')"
-            class="text-xs px-3 py-1 rounded border border-red-200 hover:bg-red-50 text-red-600 font-medium">
-            Delete
+            class="p-1 hover:bg-red-50 rounded text-red-300 hover:text-red-600" title="Delete">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
           </button>
         </div>
       </td>
@@ -281,6 +303,26 @@ async function viewHistory(id, name) {
     }).join('');
   } catch(e) {
     document.getElementById('drawer-content').innerHTML = `<p class="text-red-500">Error: ${e.message}</p>`;
+  }
+}
+
+async function grantPremium(id, name) {
+  if (!confirm(`Manually grant 30 days of Premium access to ${name}?`)) return;
+  try {
+    await apiFetch(`/students/${id}/premium-grant`, { method:'POST' });
+    init(); // reload data
+  } catch(e) {
+    alert('Failed to grant premium: ' + e.message);
+  }
+}
+
+async function resetLimits(id, name) {
+  if (!confirm(`Reset all daily usage counters for ${name}?`)) return;
+  try {
+    await apiFetch(`/students/${id}/reset-limits`, { method:'POST' });
+    init(); // reload data
+  } catch(e) {
+    alert('Failed to reset limits: ' + e.message);
   }
 }
 
