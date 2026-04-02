@@ -4,6 +4,9 @@ using K53PrepApp.Models;
 
 try 
 {
+    // Enable legacy timestamp behavior for PostgreSQL compatibility (cross-platform with SQLite)
+    AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
     var builder = WebApplication.CreateBuilder(args);
 
     // --- Services ---
