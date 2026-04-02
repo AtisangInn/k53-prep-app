@@ -21,6 +21,19 @@ public class AppDbContext : DbContext
             var currentTableName = entity.GetTableName();
             if (currentTableName != null)
                 entity.SetTableName(currentTableName.ToLower());
+
+            // Force native PostgreSQL types for dates and decimals
+            foreach (var property in entity.GetProperties())
+            {
+                if (property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?))
+                {
+                    property.SetColumnType("timestamp without time zone");
+                }
+                else if (property.ClrType == typeof(decimal) || property.ClrType == typeof(decimal?))
+                {
+                    property.SetColumnType("numeric");
+                }
+            }
         }
 
         modelBuilder.Entity<Student>()

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace K53PrepApp.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class FinalProductionBaseline : Migration
+    public partial class IroncladProduction : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -28,7 +28,7 @@ namespace K53PrepApp.Api.Migrations
                     CorrectOption = table.Column<string>(nullable: false),
                     Explanation = table.Column<string>(nullable: false),
                     IsActive = table.Column<bool>(nullable: false),
-                    CreatedAt = table.Column<DateTime>(nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -43,18 +43,18 @@ namespace K53PrepApp.Api.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(nullable: false),
                     Phone = table.Column<string>(nullable: false),
-                    FirstSeen = table.Column<DateTime>(nullable: false),
-                    LastSeen = table.Column<DateTime>(nullable: false),
+                    FirstSeen = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    LastSeen = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     FlippedCardsCount = table.Column<int>(nullable: false),
                     TotalStudySeconds = table.Column<int>(nullable: false),
                     FreeTestsUsed = table.Column<int>(nullable: false),
                     FreeFlipsToday = table.Column<int>(nullable: false),
                     FreeNextsToday = table.Column<int>(nullable: false),
-                    LastFreeFlipDate = table.Column<DateTime>(nullable: true),
+                    LastFreeFlipDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     DeviceId = table.Column<string>(nullable: false),
                     IpAddress = table.Column<string>(nullable: false),
                     IsPremium = table.Column<bool>(nullable: false),
-                    PremiumUntil = table.Column<DateTime>(nullable: true)
+                    PremiumUntil = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -70,10 +70,10 @@ namespace K53PrepApp.Api.Migrations
                     StudentId = table.Column<int>(nullable: false),
                     MPaymentId = table.Column<string>(nullable: false),
                     PfPaymentId = table.Column<string>(nullable: true),
-                    Amount = table.Column<decimal>(nullable: false),
+                    Amount = table.Column<decimal>(type: "numeric", nullable: false),
                     Status = table.Column<string>(nullable: false),
-                    CreatedAt = table.Column<DateTime>(nullable: false),
-                    CompletedAt = table.Column<DateTime>(nullable: true)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    CompletedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -93,7 +93,7 @@ namespace K53PrepApp.Api.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     StudentId = table.Column<int>(nullable: false),
-                    TakenAt = table.Column<DateTime>(nullable: false),
+                    TakenAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     DurationSeconds = table.Column<int>(nullable: false),
                     RulesScore = table.Column<int>(nullable: false),
                     RulesTotal = table.Column<int>(nullable: false),

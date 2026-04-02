@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace K53PrepApp.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260402152810_FinalProductionBaseline")]
-    partial class FinalProductionBaseline
+    [Migration("20260402154403_IroncladProduction")]
+    partial class IroncladProduction
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,7 +35,7 @@ namespace K53PrepApp.Api.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Explanation")
                         .IsRequired()
@@ -87,7 +87,7 @@ namespace K53PrepApp.Api.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("FirstSeen")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("FlippedCardsCount")
                         .HasColumnType("INTEGER");
@@ -109,10 +109,10 @@ namespace K53PrepApp.Api.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime?>("LastFreeFlipDate")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime>("LastSeen")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -123,7 +123,7 @@ namespace K53PrepApp.Api.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("PremiumUntil")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("TotalStudySeconds")
                         .HasColumnType("INTEGER");
@@ -143,13 +143,13 @@ namespace K53PrepApp.Api.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("numeric");
 
                     b.Property<DateTime?>("CompletedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("MPaymentId")
                         .IsRequired()
@@ -230,7 +230,7 @@ namespace K53PrepApp.Api.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("TakenAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("Id");
 
